@@ -1,0 +1,61 @@
+@import url("https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css");
+
+* {
+  animation: main 0.5s cubic-bezier(0, 0, 0, 1) forwards;
+}
+
+#title {
+  text-shadow: 0.125em 0 0 #0c134f;
+  text-shadow: 0em 0.125em 0 #8294c4;
+  font-weight: bold;
+  color: #0c134f;
+  transform: translateY(-0.125em);
+}
+
+#problem {
+  text-shadow: 0.125em 0 0 hsl(234, 74%, 18%);
+  text-shadow: 0em 0.125em 0 #526d82;
+  font-weight: bold;
+  color: #27374d;
+  transform: translateY(-0.125em);
+}
+
+#rank {
+  text-shadow: 0.125em 0 0 hsl(234, 74%, 18%);
+  text-shadow: 0em 0.125em 0 #b0a4a4;
+  font-weight: bold;
+  color: #14b136;
+  transform: translateY(-0.125em);
+}
+
+#hof {
+  text-shadow: 0.125em 0 0 hsl(234, 74%, 18%);
+  text-shadow: 0em 0.125em 0 #f79327;
+  font-weight: bold;
+  color: #b70404;
+  transform: translateY(-0.125em);
+}
+
+.problemTable a {
+  text-decoration: none;
+  color: blue;
+}
+
+.problemTable .author {
+  font-weight: bold;
+}
+
+main {
+  padding-top: 30px;
+}
+::-webkit-scrollbar {
+  display: none; /* 크롬, 사파리, 오페라, 엣지 */
+}
+
+nav {
+  position: fixed !important;
+  display: flex;
+  top: 0;
+  left: 0;
+  right: 0;
+}
