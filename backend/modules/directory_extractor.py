@@ -55,29 +55,6 @@ def extract_text(file_data, ext):
             extractor = EmlExtractor(file_data)
             extractor.parse_eml_file()
             text = extractor.extract_body()
-        elif ext == ".pst":
-            # 파일 데이터를 임시 파일로 저장
-            with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-                tmp_file.write(file_data)
-                tmp_file_path = tmp_file.name
-            
-                try:
-                    # PSTExtractor 인스턴스 생성
-                    extractor = PSTExtractor(tmp_file_path, save_dir)
-                
-                    # .pst 파일에서 이메일과 첨부 파일 추출 및 데이터베이스 저장
-                    extractor.extract_emails_from_pst()
-                
-                    # 성공 메시지 출력 (필요에 따라 수정)
-                    print("PST 파일 처리 완료.")
-                
-                except Exception as e:
-                    # 오류 메시지 출력
-                    print(f"Error while processing PST file: {str(e)}")
-            
-                finally:
-                    # 임시 파일 삭제
-                    os.remove(tmp_file_path)
         elif ext in [".txt", ".csv"]:
             text = read_file_with_different_encodings(file_data)
         elif ext == ".zip":
@@ -177,28 +154,11 @@ def process_directories(directories, parsingDBpath):
             conn.close()
 
     return 200, "Success"
-    
-# DB 연결 및 테이블 생성 부분에서 blob_data 컬럼 추가
-conn = sqlite3.connect('parsing.sqlite')
-cursor = conn.cursor()
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS files (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    file_path TEXT NOT NULL,
-    hash_value TEXT NOT NULL,
-    plain_text TEXT,
-    m_time TEXT NOT NULL,
-    a_time TEXT NOT NULL,
-    c_time TEXT NOT NULL,
-    blob_data BLOB
-)
-''')
+
 
 # 화이트리스트 확장자
 whitelist_extensions = ('.doc', '.docx', '.pptx', '.xlsx', '.pdf', '.hwp', '.eml',
     '.pst', '.ost', '.ppt', '.xls', '.csv', '.txt','.zip','.7z')
-
-conn.close()
 
 # get_parsing_db_path 함수 정의 (casedb에서 parsingDBpath 값을 조회)
 def get_parsing_db_path(case_id):

@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify, Blueprint, make_response
 import MeCab
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import euclidean_distances
 import sqlite3
 import os
 
 app = Flask(__name__)
-similarity_bp = Blueprint('similarity', __name__)
+similarity_bp = Blueprint('similarity',__name__)
 
 # MeCab 객체 생성
 m = MeCab.Tagger()
@@ -17,7 +17,7 @@ def tokenize_words(text):
     words = [word.split('\t')[0] for word in words if 'NNG' in word and len(word) > 1]
     return words
 
-@similarity_bp.route('/', methods=['POST'])
+@similarity_bp.route('/similarity', methods=['POST'])
 def similarity():
     data = request.json
     if not data or 'parsingDBpath' not in data or 'primary_id_key' not in data:
@@ -25,7 +25,8 @@ def similarity():
 
     db_path = data['parsingDBpath']
     primary_id_key = data['primary_id_key']
-
+    
+    conn = None
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -49,21 +50,24 @@ def similarity():
         for doc in documents:
             doc_id, doc_text, doc_filepath = doc
             doc_text_nouns = ' '.join(tokenize_words(doc_text))
-
+            # 벡터화
             tfidf_matrix = vectorizer.fit_transform([text1_nouns, doc_text_nouns])
-            cosine_sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
-
-            similarity_percentage = round(cosine_sim[0][0] * 100, 2)
-            if cosine_sim[0][0] >= 0.8:
+            # 유클리디언 거리 계산
+            euclidean_dist = euclidean_distances(tfidf_matrix[0:1], tfidf_matrix[1:2])
+            # 거리를 유사도 점수로 변환
+            similarity_score = 1 - euclidean_dist[0][0]
+            
+            if similarity_score >= 0.97:
                 similar_documents.append({
                     'id': doc_id,
                     'filename': os.path.basename(doc_filepath),
-                    'similarity_percentage': similarity_percentage
+                    'similarity_percentage': similarity_score
                 })
-
-        conn.close()
         return jsonify(similar_documents)
 
     except sqlite3.DatabaseError as e:
-        conn.close()
         return make_response(jsonify({'error': str(e)}), 500)
+    finally:
+        # 예외 발생 여부에 관계없이 데이터베이스 연결이 열려있는지 확인하고 닫기
+        if conn is not None:
+            conn.close()
