@@ -6,6 +6,8 @@ import sqlite3
 from . import parsing
 from datetime import datetime
 import threading
+from .eml_extractor import EmlParser
+from .pst_eml_extractor import PSTParser
 
 def get_db_connection(db_path):
     if db_path is None:
@@ -43,7 +45,7 @@ def process_directory(directory, fs_info, relative_path, db_path=None):
         try:
             if directory_entry.info.meta is None:
                 continue
-
+            
             if directory_entry.info.meta.type == pytsk3.TSK_FS_META_TYPE_DIR:
                 sub_directory = directory_entry.as_directory()
                 sub_directory_name = directory_entry.info.name.name.decode()
@@ -73,20 +75,73 @@ def extract_file(directory_entry, fs_info, file_name, relative_path, db_path):
         file_object = fs_info.open_meta(inode=directory_entry.info.meta.addr)
         file_data = file_object.read_random(0, file_object.info.meta.size)
         ext = os.path.splitext(file_name)[1].lower()
-
-        c_time, m_time, a_time = get_file_metadata(directory_entry)
-        logging.info("File Metadata - Creation Time: %s, Modification Time: %s, Access Time: %s", c_time, m_time, a_time)
-
-        file_text = parsing.extract_text(file_data, ext)
-        hash_value = parsing.calculate_hash(file_data)
-
-        blob_data = sqlite3.Binary(file_data)
-
-        file_info = (os.path.join(relative_path, file_name), hash_value, file_text, str(m_time), str(a_time), str(c_time))
         conn = get_db_connection(db_path)
-        parsing.save_metadata_and_blob_to_db(conn, file_info, blob_data)
-        conn.close()
-        logging.info("Data saved to DB: %s", file_info[:6])
+        
+        if ext == '.eml':
+            emlfile = parsing.extract_text(file_data, ext) #eml일 경우 그냥 바이트 스트림 형식으로 된 eml 파일을 반환함
+            # EML 데이터를 사용하여 EmlParser 인스턴스를 생성
+            parser = EmlParser(emlfile)
+
+            # EML 파일 정보 추출
+            (subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body) = parser.process_eml()
+            (attachments) = parser.extract_attachments()
+            
+            save_location = os.path.join(relative_path, file_name)
+               
+            emlfile_info = (save_location, subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body)
+            
+            logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
+            parsing.save_metadata_and_blob_to_db_emlVersion(conn, emlfile_info)
+            logging.info("Data saved to DB: %s", emlfile_info)  # DB에 데이터 저장 후 로깅
+            
+            if attachments:
+                for filename, content_type, body, plain_text in attachments:
+                    Fn = filename
+                    Ct = content_type
+                    Body = body
+                    pt = plain_text
+                    md5_hash = parsing.calculate_hash(Body)
+                    emlBlobData = sqlite3.Binary(Body)
+                    emlAttachments_info = (save_location, Fn, md5_hash, emlBlobData,pt)
+                    logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
+                    parsing.save_metadata_and_blob_to_db_emlAttachmentsVersion(conn, emlAttachments_info)
+                    logging.info("Data saved to DB: %s", emlAttachments_info)  # DB에 데이터 저장 후 로깅
+        
+        if ext == '.pst':
+            pstfile = parsing.extract_text(file_data, ext)
+            parser = PSTParser(pstfile)
+            psteml = parser.extract_emails_from_pst()
+            save_location = os.path.join(relative_path, file_name)
+            if psteml:
+                for pstdata in psteml:
+                    subject = pstdata['subject']
+                    sender = pstdata['sender']
+                    receiver = pstdata['receiver']
+                    body = pstdata['body']
+                    date = pstdata['date']
+                    ctime = pstdata['ctime']
+                    mtime = pstdata['mtime']
+                    atime = pstdata['atime']
+                    hash = parser.calculate_hash(body)
+                    pst_info = (save_location, subject, date, sender, receiver, ctime, mtime, atime, hash, body)
+                    logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
+                    parsing.save_metadata_and_blob_to_db_emlVersion(conn, pst_info)
+                    logging.info("Data saved to DB: %s", pst_info)  # DB에 데이터 저장 후 로깅
+                    
+        if ext != '.eml' and ext != '.pst':
+            c_time, m_time, a_time = get_file_metadata(directory_entry)
+            logging.info("File Metadata - Creation Time: %s, Modification Time: %s, Access Time: %s", c_time, m_time, a_time)
+
+            file_text = parsing.extract_text(file_data, ext)
+            hash_value = parsing.calculate_hash(file_data)
+
+            blob_data = sqlite3.Binary(file_data)
+
+            file_info = (os.path.join(relative_path, file_name), hash_value, file_text, str(m_time), str(a_time), str(c_time))
+            
+            parsing.save_metadata_and_blob_to_db(conn, file_info, blob_data)
+            conn.close()
+            logging.info("Data saved to DB: %s", file_info[:6])
 
     except Exception as e:
         logging.error("Failed to extract or save data for file: %s, Error: %s", file_name, str(e))

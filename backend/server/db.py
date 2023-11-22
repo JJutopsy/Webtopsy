@@ -88,24 +88,49 @@ def init_tables_db(db_path):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS emlEmails (
         save_location TEXT,
-        md5_hash TEXT,
         subject TEXT,
-        date TEXT,
+        date TEXT,     
         sender TEXT,
         receiver TEXT,
         ctime TEXT,
         mtime TEXT,
         atime TEXT,
-        mail_body TEXT
+        hash TEXT,
+        body TEXT,
+        tag TEXT,
+        NNP TEXT
     )
     ''')
 
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS emlAttachments (
-        email_save_location TEXT,
+        save_location TEXT,
         filename TEXT,
         hash TEXT,
-        data BLOB
+        data BLOB,
+        plain_text TEXT,
+        tag TEXT,
+        NNP TEXT
+    )
+    ''')
+    
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS pstAttachments (
+        save_location TEXT,
+        subject TEXT,
+        filename TEXT,
+        hash TEXT,
+        data BLOB,
+        plain_text TEXT,
+        tag TEXT,
+        NNP TEXT
+    )
+    ''')
+    
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS emlPerson (
+        emlPerson TEXT,
+        relatedPerson TEXT
     )
     ''')
     cursor.execute("""
