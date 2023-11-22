@@ -7,7 +7,6 @@ from .comment import comment_bp
 from .files import files_bp
 from .newcase import newcase_bp
 from .case import case_bp
-# from .calendar_bp import calendar_bp
 from .db_thread import DBThread
 from .similarity import similarity_bp
 from .search import search_bp
@@ -24,9 +23,8 @@ def create_app():
     app.register_blueprint(case_bp)
     app.register_blueprint(files_bp)
     app.register_blueprint(comment_bp)
-    app.register_blueprint(similarity_bp, url_prefix='/similarity')
-    app.register_blueprint(search_bp, url_prefix='/search')
-#    app.register_blueprint(calendar_bp)
+    app.register_blueprint(similarity_bp)
+    app.register_blueprint(search_bp)
 
     app.db_thread = DBThread()
 
