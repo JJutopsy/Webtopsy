@@ -13,7 +13,10 @@ def email_relation():
     if not os.path.exists(db_path):
         return '데이터베이스 파일을 찾을 수 없습니다.', 404
     
-    eml_person_updater = EmlPersonUpdater(db_path)
-    eml_person_updater.update_eml_person_table()
+    try:
+        eml_person_updater = EmlPersonUpdater(db_path)
+        eml_person_updater.update_eml_person_table()
 
-    return jsonify('EmailPerson successfully', 200)
+        return jsonify('EmailPerson successfully', 200)
+    except Exception as e:
+        return jsonify({'error': str(e)})

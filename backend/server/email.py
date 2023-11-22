@@ -16,21 +16,24 @@ def email_relation():
     if not os.path.exists(db_path):
         return '데이터베이스 파일을 찾을 수 없습니다.', 404
 
-    # SQLite 데이터베이스 설정 변경
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+    # # SQLite 데이터베이스 설정 변경
+    # conn = sqlite3.connect(db_path)
+    # cursor = conn.cursor()
     
-    # 새 댓글 추가
-    cursor.execute("")
+    # # 새 댓글 추가
+    # cursor.execute("")
 
-    # 변경사항 저장
-    conn.commit()
+    # # 변경사항 저장
+    # conn.commit()
 
-    # 연결 종료
-    conn.close()
+    # # 연결 종료
+    # conn.close()
+    try:
+        email_searcher = EmailSearcher(db_path, eml_person, related_person)
+        result = email_searcher.sort_and_print_related_emails()
+
+        # return jsonify('Email successfully', 200)
+        return jsonify({'result': result})
     
-    email_searcher = EmailSearcher(db_path, eml_person, related_person)
-    result = email_searcher.sort_and_print_related_emails()
-
-    # return jsonify('Email successfully', 200)
-    return jsonify({'result': result})
+    except Exception as e:
+        return jsonify({'error': str(e)})
