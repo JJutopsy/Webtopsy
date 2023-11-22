@@ -8,8 +8,6 @@ from .hwp_extractor import HWPExtractor
 from .docx_extractor import DOCXExtractor
 from .pptx_extractor import PPTXExtractor
 from .xlsx_extractor import XLSXExtractor
-from .eml_extractor import EmlExtractor
-from .pst_extractor import PSTExtractor
 from .pdf_extractor import PDFExtractor
 import zipfile
 import logging
