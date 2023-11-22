@@ -23,7 +23,7 @@ def read_file_with_different_encodings(file_data):
             return file_data.decode(encoding).strip()
         except Exception:
             continue
-    raise Exception("Unable to decode the file data with the provided encodings.")
+    raise Exception("Unable to decode the  file data with the provided encodings.")
 
 def extract_text(file_data, ext):
     text = ""
