@@ -41,8 +41,7 @@ import Flag from "../pages/Flag";
 import DashTable from "./DashTable";
 
 function PostList() {
-  const db_path =
-    "C:\\Users\\dswhd\\Webtopsy-2\\cases\\1\\parsing.sqlite";
+  const db_path = "C:\\Users\\dswhd\\Webtopsy-2\\cases\\1\\parsing.sqlite";
   const [rows, setRows] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [inputValue, setInputValue] = useState("");
@@ -55,15 +54,15 @@ function PostList() {
   const [showAll, setShowAll] = useState(false); // 태그 전체 보기 여부를 관리하는 state
   const files = [
     {
-      fileName: '파일1.txt',
-      filePath: '/경로/파일1.txt',
-      author: '작성자1',
-      lastModified: '2021-09-01',
-      lastAccessed: '2021-09-02',
-      created: '2021-08-31',
-      md5Hash: '1234567890',
-      sha256Hash: '0987654321',
-      fileExtension: 'txt',
+      fileName: "파일11.txt",
+      filePath: "/경로/파일1.txt",
+      author: "작성자1",
+      lastModified: "2021-09-01",
+      lastAccessed: "2021-09-02",
+      created: "2021-08-31",
+      md5Hash: "1234567890",
+      sha256Hash: "0987654321",
+      fileExtension: "txt",
     },
     // 다른 파일들도 추가할 수 있습니다.
   ];
@@ -352,12 +351,12 @@ function PostList() {
                                 sx={
                                   selectedText
                                     ? {
-                                      fontWeight: "bold",
-                                      overflow: "hidden",
-                                      textOverflow: "ellipsis",
-                                      whiteSpace: "nowrap",
-                                      maxWidth: 260,
-                                    }
+                                        fontWeight: "bold",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                        maxWidth: 260,
+                                      }
                                     : { fontWeight: "bold" }
                                 }
                               >
@@ -483,22 +482,36 @@ function PostList() {
                         </tr>
                         <tr>
                           <th>파일 출처</th>
-                          <th><Badge bg='primary'>고수봉 대리.zip</Badge>~\카카오톡 받은 파일\골절이란.hwp</th>
+                          <th>
+                            <Badge bg="primary">고수봉 대리.zip</Badge>
+                            ~\카카오톡 받은 파일\골절이란.hwp
+                          </th>
                         </tr>
                         <tr>
                           <th>파일 경로</th>
-                          <th><pre>C:\Users\SeoJongChan\Documents\카카오톡 받은 파일\골절이란.hwp</pre></th>
+                          <th>
+                            <pre>
+                              C:\Users\SeoJongChan\Documents\카카오톡 받은
+                              파일\골절이란.hwp
+                            </pre>
+                          </th>
                         </tr>
                         <tr>
-                          <th><pre>생성 시간</pre></th>
+                          <th>
+                            <pre>생성 시간</pre>
+                          </th>
                           <th>2021-10-23 08:12:56</th>
                         </tr>
                         <tr>
-                          <th><pre>수정 시간</pre></th>
+                          <th>
+                            <pre>수정 시간</pre>
+                          </th>
                           <th>2021-10-23 08:12:56</th>
                         </tr>
                         <tr>
-                          <th><pre>마지막 접근 시간</pre></th>
+                          <th>
+                            <pre>마지막 접근 시간</pre>
+                          </th>
                           <th>2021-10-24 15:22:06</th>
                         </tr>
                         <tr>
@@ -511,7 +524,10 @@ function PostList() {
                         </tr>
                         <tr>
                           <th>해시값(sha-256)</th>
-                          <th>5af2943af85e379b01a77217a15dbbfa71a12fce2ba626f5e136<br></br>357d57f33213</th>
+                          <th>
+                            5af2943af85e379b01a77217a15dbbfa71a12fce2ba626f5e136
+                            <br></br>357d57f33213
+                          </th>
                         </tr>
                       </tbody>
                     </Table>
