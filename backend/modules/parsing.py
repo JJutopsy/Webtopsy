@@ -1,6 +1,6 @@
 import hashlib
 import sqlite3
-import time
+import re
 from pathlib import Path
 from io import BytesIO
 from .ole_extractor import OLEExtractor
@@ -14,7 +14,9 @@ from .pdf_extractor import PDFExtractor
 import zipfile
 import logging
 import os
-import tempfile
+
+def contains_hangul(text):
+    return bool(re.search('[가-힣]', text))
 
 def read_file_with_different_encodings(file_data):
     encodings = ['utf-8', 'iso-8859-1', 'cp949']  
