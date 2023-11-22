@@ -44,7 +44,7 @@ class EmailSearcher:
                 json_data.append(email_data)
 
             # JSON 형식으로 출력
-            print(json.dumps(json_data, ensure_ascii=False, indent=2))
+            return json_data
 
         except sqlite3.Error as e:
             print("SQLite 오류:", e)
@@ -54,9 +54,9 @@ class EmailSearcher:
             conn.close()
 
 # 예시 사용법
-database_path = r'D:\\Download\\Webtopsy-main\\Webtopsy-main\\cases\\성심당 사건16\\parsing.sqlite'
-emlperson = '유광재'  # 여기에 찾고자 하는 이름을 넣어주세요.
-related_person = '이지수'  # 여기에 관계자의 이름을 넣어주세요.
+# database_path = r'D:\\Download\\Webtopsy-main\\Webtopsy-main\\cases\\성심당 사건16\\parsing.sqlite'
+# emlperson = '유광재'  # 여기에 찾고자 하는 이름을 넣어주세요.
+# related_person = '이지수'  # 여기에 관계자의 이름을 넣어주세요.
 
-email_searcher = EmailSearcher(database_path, emlperson, related_person)
-email_searcher.sort_and_print_related_emails()
+# email_searcher = EmailSearcher(database_path, emlperson, related_person)
+# email_searcher.sort_and_print_related_emails()

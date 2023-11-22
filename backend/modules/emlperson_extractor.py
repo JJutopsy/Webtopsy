@@ -77,6 +77,6 @@ class EmlPersonUpdater:
             conn.close()
 
 # 예시 사용법
-db_path = r'D:\\Download\\Webtopsy-main\\Webtopsy-main\\cases\\성심당 사건16\\parsing.sqlite'
-eml_person_updater = EmlPersonUpdater(db_path)
-eml_person_updater.update_eml_person_table()
+# db_path = r'D:\\Download\\Webtopsy-main\\Webtopsy-main\\cases\\성심당 사건16\\parsing.sqlite'
+# eml_person_updater = EmlPersonUpdater(db_path)
+# eml_person_updater.update_eml_person_table()

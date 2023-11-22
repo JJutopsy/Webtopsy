@@ -133,6 +133,7 @@ def init_tables_db(db_path):
         relatedPerson TEXT
     )
     ''')
+    
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS comments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

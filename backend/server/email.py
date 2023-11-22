@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 import sqlite3
 import os
 from datetime import datetime
+from modules.eml_throw import EmailSearcher
 
 email_bp = Blueprint('email', __name__)
 
@@ -9,7 +10,8 @@ email_bp = Blueprint('email', __name__)
 def email_relation():
     data = request.get_json()
     db_path = data.get('db_path')
-
+    eml_person = data.get('eml_person')
+    related_person = data.get('related_person')
 
     if not os.path.exists(db_path):
         return '데이터베이스 파일을 찾을 수 없습니다.', 404
@@ -26,5 +28,9 @@ def email_relation():
 
     # 연결 종료
     conn.close()
+    
+    email_searcher = EmailSearcher(db_path, eml_person, related_person)
+    result = email_searcher.sort_and_print_related_emails()
 
-    return jsonify('Email successfully', 200)
+    # return jsonify('Email successfully', 200)
+    return jsonify({'result': result})
