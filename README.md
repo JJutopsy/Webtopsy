@@ -20,3 +20,5 @@ npm start
 
 1. `backend/server/__init__.py `이동
 2. `from .newcase import newcase_bp` 등 에러나는 모듈 제외
+
+3. 이메일 모듈입니다.
