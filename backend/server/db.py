@@ -63,6 +63,7 @@ def init_tables_db(db_path):
     CREATE TABLE IF NOT EXISTS files (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         file_path TEXT NOT NULL,
+        file_owner TEXT,
         hash_value TEXT NOT NULL,
         plain_text TEXT,
         m_time TEXT NOT NULL,
@@ -73,41 +74,30 @@ def init_tables_db(db_path):
         nnp TEXT
     )
     ''')
-    
-    # artifacts 테이블 생성
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS artifacts (
-        name TEXT,
-        text TEXT,
-        m_time TEXT,
-        a_time TEXT,
-        c_time TEXT
-    )
-    ''')
-    
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS emlEmails (
-        save_location TEXT,
-        md5_hash TEXT,
-        subject TEXT,
-        date TEXT,
-        sender TEXT,
-        receiver TEXT,
-        ctime TEXT,
-        mtime TEXT,
-        atime TEXT,
+        save_location TEXT NOT NULL,
+        hash_value TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        date TEXT NOT NULL,
+        sender TEXT NOT NULL,
+        receiver TEXT NOT NULL,
+        ctime TEXT NOT NULL,
+        mtime TEXT NOT NULL,
+        atime TEXT NOT NULL,
         mail_body TEXT
     )
     ''')
-
+    
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS emlAttachments (
-        email_save_location TEXT,
-        filename TEXT,
-        hash TEXT,
+        email_save_location TEXT NOT NULL,
+        filename TEXT NOT NULL,
+        hash TEXT NOT NULL,
         data BLOB
     )
     ''')
+    
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS comments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
