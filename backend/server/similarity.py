@@ -17,7 +17,7 @@ def tokenize_words(text):
     words = [word.split('\t')[0] for word in words if 'NNG' in word and len(word) > 1]
     return words
 
-@similarity_bp.route('/', methods=['POST'])
+@similarity_bp.route('/similarity', methods=['POST'])
 def similarity():
     data = request.json
     if not data or 'parsingDBpath' not in data or 'primary_id_key' not in data:
@@ -54,7 +54,7 @@ def similarity():
             cosine_sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
 
             similarity_percentage = round(cosine_sim[0][0] * 100, 2)
-            if cosine_sim[0][0] >= 0.8:
+            if cosine_sim[0][0] >= 0.9:
                 similar_documents.append({
                     'id': doc_id,
                     'filename': os.path.basename(doc_filepath),
