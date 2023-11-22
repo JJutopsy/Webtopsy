@@ -41,7 +41,7 @@ import Flag from "../pages/Flag";
 import DashTable from "./DashTable";
 
 function PostList() {
-  const db_path = "C:\\Users\\dswhd\\Webtopsy-2\\cases\\1\\parsing.sqlite";
+  const db_path = process.env.REACT_APP_HOME+"\\1\\parsing.sqlite";
   const [rows, setRows] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [inputValue, setInputValue] = useState("");
