@@ -179,26 +179,11 @@ def process_directories(directories, parsingDBpath):
     return 200, "Success"
     
 # DB 연결 및 테이블 생성 부분에서 blob_data 컬럼 추가
-conn = sqlite3.connect('parsing.sqlite')
-cursor = conn.cursor()
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS files (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    file_path TEXT NOT NULL,
-    hash_value TEXT NOT NULL,
-    plain_text TEXT,
-    m_time TEXT NOT NULL,
-    a_time TEXT NOT NULL,
-    c_time TEXT NOT NULL,
-    blob_data BLOB
-)
-''')
 
 # 화이트리스트 확장자
 whitelist_extensions = ('.doc', '.docx', '.pptx', '.xlsx', '.pdf', '.hwp', '.eml',
     '.pst', '.ost', '.ppt', '.xls', '.csv', '.txt','.zip','.7z')
 
-conn.close()
 
 # get_parsing_db_path 함수 정의 (casedb에서 parsingDBpath 값을 조회)
 def get_parsing_db_path(case_id):
