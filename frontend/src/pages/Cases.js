@@ -145,7 +145,7 @@ export default function Cases() {
                 <Card.Text>{caseItem.parsingDBpath}</Card.Text>
                 <Button
                   variant="primary"
-                  onClick={() => (window.location.href = "/case/example")}
+                  onClick={() => (window.location.href = "/case/example?path=" + encodeURIComponent(caseItem.parsingDBpath))}
                 >
                   접속
                 </Button>

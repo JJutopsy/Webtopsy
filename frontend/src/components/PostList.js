@@ -41,7 +41,14 @@ import Flag from "../pages/Flag";
 import DashTable from "./DashTable";
 
 function PostList() {
-  const db_path = process.env.REACT_APP_HOME+"\\1\\parsing.sqlite";
+  // URL에서 쿼리 스트링 추출
+  const queryString = window.location.search;
+
+  // 쿼리 스트링 파싱
+  const urlParams = new URLSearchParams(queryString);
+
+  // 'path' 파라미터 값 복호화
+  const db_path = decodeURIComponent(urlParams.get('path'));
   const [rows, setRows] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [inputValue, setInputValue] = useState("");
@@ -100,7 +107,7 @@ function PostList() {
     const fetchData = async () => {
       if (keyword == "") return;
       const data = {
-        db_path: db_path,
+        parsingDBpath: db_path,
         keyword: keyword,
       };
 
@@ -351,12 +358,12 @@ function PostList() {
                                 sx={
                                   selectedText
                                     ? {
-                                        fontWeight: "bold",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        whiteSpace: "nowrap",
-                                        maxWidth: 260,
-                                      }
+                                      fontWeight: "bold",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                      whiteSpace: "nowrap",
+                                      maxWidth: 260,
+                                    }
                                     : { fontWeight: "bold" }
                                 }
                               >
