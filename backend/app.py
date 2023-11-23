@@ -14,4 +14,4 @@ if __name__ == '__main__':
     try:
         app.run(debug=True)     
     finally:
-        app.db_thread.stop()
+        app.db_thread.stop()    

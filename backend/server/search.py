@@ -2,6 +2,8 @@ from flask import Flask, Blueprint, request, jsonify
 import sqlite3
 import os
 import re
+import sys
+from dotenv import load_dotenv
 
 search_bp = Blueprint('search', __name__)
 
@@ -11,8 +13,11 @@ def highlight_keywords(text, keyword):
 
 @search_bp.route('/keyword', methods=['POST'])
 def search_keyword():
+    load_dotenv()
+
     data = request.get_json()
-    parsingDBpath = data.get('parsingDBpath')
+    parsingDBpath = os.environ.get("REACT_APP_HOME")+"/"+data.get('parsingDBpath')
+    print("!!",parsingDBpath)
     keyword = data.get('keyword')
 
     if not os.path.exists(parsingDBpath):

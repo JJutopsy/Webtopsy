@@ -55,15 +55,17 @@ export default function Cases() {
     if (name === "" || info === "" || selectedItems.length === 0) {
       setOpen(true);
     } else {
+      const currentItems = selectedItems.map(item => item.current);
       const data = {
         casename: name,
         caseinfo: info,
-        casedata: selectedItems,
+        casedata: currentItems,
         total: selectedItems.length,
         nnp: false,
         tag: false,
       };
 
+      console.log(data);
       fetch("http://localhost:5000/newcase", {
         method: "POST",
         headers: {

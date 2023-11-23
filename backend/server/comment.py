@@ -85,7 +85,6 @@ def get_comments(post_id):
 def get_recent_comments():
     data = request.get_json()
     db_path = data.get('db_path')
-    print(db_path)
     if not os.path.exists(db_path):
 
         return '데이터베이스 파일을 찾을 수 없습니다.', 404
@@ -105,5 +104,4 @@ def get_recent_comments():
 
     # 연결 종료
     conn.close()
-    print(result_list)
     return jsonify(result_list)

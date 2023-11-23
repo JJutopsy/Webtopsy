@@ -12,7 +12,6 @@ def get_case_data():
         # 데이터베이스에서 정보 조회
         cursor.execute("SELECT * FROM cases")
         rows = cursor.fetchall()
-        print(rows)
         # JSON 형태로 변환
         case_data = []
         for row in rows:
