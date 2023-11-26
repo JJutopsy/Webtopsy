@@ -36,7 +36,7 @@ export default function CommentsList({ db_path }) {
           return response.json();
         })
         .then((data) => {
-          console.log(data); // 콘솔에 응답 출력
+        
           setComments(data); // 상태 업데이트
         })
         .catch((error) => console.error(error));

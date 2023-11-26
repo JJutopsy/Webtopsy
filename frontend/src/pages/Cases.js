@@ -18,7 +18,12 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
+import { useRecoilState } from 'recoil';
+import { buttonState } from "../atom/ButtonState";
+
 export default function Cases() {
+  const [state, setState] = useRecoilState(buttonState); // Recoil 상태와 setState 가져오기
+
   const [show, setShow] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [name, setName] = useState("");
