@@ -88,7 +88,7 @@ function PostList() {
 
   const handleSearch = () => {
     setKeyword(inputValue);
-    console.log(keyword);
+
   };
 
   const handleKeyPress = (e) => {
@@ -139,7 +139,7 @@ function PostList() {
           };
         });
         if (keyword != "") setRows(formattedResult);
-        console.log(formattedResult);
+
         const allTags = new Set();
         formattedResult.forEach((item) => {
           if (item.tag) {
@@ -152,7 +152,7 @@ function PostList() {
       }
     };
 
-    console.log(rows);
+
     fetchData();
   }, [keyword]);
 
@@ -161,10 +161,10 @@ function PostList() {
       <Box
         sx={{
           display: "flex",
-          backgroundColor: "#E9EDF5",
+          width:"100%"
         }}
       >
-        <Box width={"80%"} sx={{ flexGrow: 1, paddingRight: "40px" }}>
+        <Box width={"80%"} sx={{ flexGrow: 1, paddingRight: "20px" }}>
           <div style={{ display: "flex" }}>
             <div
               style={{
@@ -173,14 +173,17 @@ function PostList() {
             >
               <div
                 style={{
-                  height: "100vh",
+
                   display: "flex",
                   flexDirection: "column",
                   overflow: "auto",
                   paddingLeft: "20px",
-                  paddingTop: "50px",
+                  paddingTop: "20px",
                 }}
               >
+              <div class="topbar" style={{bottom: 0, left:0,position:"fixed", width:"80%", background:"white"}}>
+
+
                 {!keyword ? (
                   <Typography
                     variant="h6"
@@ -191,6 +194,7 @@ function PostList() {
                   </Typography>
                 ) : (
                   <Typography
+                  
                     variant="h6"
                     component="div"
                     sx={{ fontWeight: "bold" }}
@@ -218,14 +222,8 @@ function PostList() {
                           id="input-group-dropdown-1"
                         >
                           <Dropdown.Item href="#">사람 이름</Dropdown.Item>
-                          <Dropdown.Item href="#">조직 이름</Dropdown.Item>
                           <Dropdown.Divider />
-                          <Dropdown.Item href="#">
-                            보기 옵션: 리스트 뷰
-                          </Dropdown.Item>
-                          <Dropdown.Item href="#">
-                            보기 옵션: 테이블 뷰
-                          </Dropdown.Item>
+                          <Dropdown.Item href="#">조직 이름</Dropdown.Item>
                         </DropdownButton>
                         <Form.Control
                           type="text"
@@ -251,7 +249,7 @@ function PostList() {
                         <DashTable />
                       </div>
                     ) : (
-                      <Box>
+                      <Box >
                         {tags
                           .slice(0, showAll ? tags.length : 10)
                           .map((tag, index) => (
@@ -283,13 +281,14 @@ function PostList() {
                     )}
                   </Stack>
                 </Box>
-
+                </div>
                 <div
                   style={{
                     overflowY: "auto",
                     flex: 1,
                     scrollbarWidth: "none",
                     msOverflowStyle: "none",
+
                   }}
                 >
                   {rows
@@ -485,7 +484,7 @@ function PostList() {
                       <tbody>
                         <tr>
                           <th>파일 명</th>
-                          <th>rows[selectedId].fileName</th>
+                          <th></th>
                         </tr>
                         <tr>
                           <th>파일 출처</th>

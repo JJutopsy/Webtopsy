@@ -20,6 +20,8 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import { useRecoilState } from 'recoil';
 import { buttonState } from "../atom/ButtonState";
+import CaseCard from '../components/CaseCard';  // CaseCard 컴포넌트를 import합니다.
+
 
 export default function Cases() {
   const [state, setState] = useRecoilState(buttonState); // Recoil 상태와 setState 가져오기
@@ -66,7 +68,7 @@ export default function Cases() {
         caseinfo: info,
         casedata: currentItems,
         total: selectedItems.length,
-        nnp: false,
+        nnp: true,
         tag: true,
       };
 
@@ -144,20 +146,7 @@ export default function Cases() {
           </Card>
 
           {cases.map((caseItem, index) => (
-            <Card style={{ width: "18rem" }}>
-              <Card.Header>#{caseItem.id}</Card.Header>
-              <Card.Body>
-                <Card.Title>{caseItem.casename}</Card.Title>
-                <Card.Text>{caseItem.caseinfo}</Card.Text>
-                <Card.Text>{caseItem.parsingDBpath}</Card.Text>
-                <Button
-                  variant="primary"
-                  onClick={() => (window.location.href = "/case/example?path=" + encodeURIComponent(caseItem.parsingDBpath))}
-                >
-                  접속
-                </Button>
-              </Card.Body>
-            </Card>
+            <CaseCard caseItem={caseItem} />
           ))}
         </Box>
 
