@@ -485,7 +485,7 @@ function PostList() {
                       <tbody>
                         <tr>
                           <th>파일 명</th>
-                          <th>골절이란.hwp</th>
+                          <th>rows[selectedId].fileName</th>
                         </tr>
                         <tr>
                           <th>파일 출처</th>
@@ -522,18 +522,9 @@ function PostList() {
                           <th>2021-10-24 15:22:06</th>
                         </tr>
                         <tr>
-                          <th>해시값(md5)</th>
-                          <th>6512bd43d9caa6e02c990b0a82652dca</th>
-                        </tr>
-                        <tr>
-                          <th>해시값(sha-1)</th>
-                          <th>3f9a08f1a69ffca3286f1e1433f165a0a31c0d38</th>
-                        </tr>
-                        <tr>
-                          <th>해시값(sha-256)</th>
+                          <th>해시값<br></br>(sha-256)</th>
                           <th>
-                            5af2943af85e379b01a77217a15dbbfa71a12fce2ba626f5e136
-                            <br></br>357d57f33213
+                            5af2943af85e379b01a77217a15dbbfa71a12fce2ba626f5e136357d57f33213
                           </th>
                         </tr>
                       </tbody>

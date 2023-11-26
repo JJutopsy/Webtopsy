@@ -62,7 +62,7 @@ export default function Cases() {
         casedata: currentItems,
         total: selectedItems.length,
         nnp: false,
-        tag: false,
+        tag: true,
       };
 
       console.log(data);
