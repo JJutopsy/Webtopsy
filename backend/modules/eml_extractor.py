@@ -125,7 +125,11 @@ class EmlParser:
         # 'To' 필드 처리
         to = decode_header(self.msg['To'])[0][0]
         if isinstance(to, bytes):
-            to = to.decode('utf-8', errors='ignore')
+            #to = to.decode('utf-8', errors='ignore')
+            try:
+                to = to.decode('utf-8')
+            except UnicodeDecodeError:
+                to = to.decode('euc-kr', errors='ignore')
         to = to.replace('<', '').replace('>', '').strip()
 
         # ';'를 ','로 바꾸기
