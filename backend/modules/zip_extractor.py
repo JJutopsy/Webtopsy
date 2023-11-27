@@ -5,8 +5,6 @@ import sqlite3
 import os
 from . import parsing
 from datetime import datetime
-from .eml_extractor import EmlParser
-from .pst_eml_extractor import PSTParser
 
 # 로깅 설정
 logging.basicConfig(

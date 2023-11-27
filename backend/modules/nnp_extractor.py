@@ -184,66 +184,7 @@ class NERExtractor:
             print(f"Processed {i}/{total_texts} texts ({progress_percent:.2f}%)", end='\r')
 
         self.conn.commit()
-    
-    def process_texts_eml(self):
-        # Process texts from the database
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT body FROM emlEmails")  # Modify table and column names accordingly
-        texts = cursor.fetchall()
+        self.conn.close()
 
-        total_texts = len(texts)
-        MAX_TEXT_LENGTH = 100000
-
-        for i, text in enumerate(texts):
-            keywords = self.get_nnp(text[0])
-            if keywords is not None:
-                cursor.execute("UPDATE emlEmails SET NNP = ? WHERE body = ?", (keywords, text[0]))
-
-            progress_percent = (i + 1) / total_texts * 100
-            print(f"Processed {i}/{total_texts} texts ({progress_percent:.2f}%)", end='\r')
-
-        self.conn.commit()
-        
-        
-    def process_texts_emlAttachments(self):
-        # Process texts from the database
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT plain_text FROM emlAttachments")  # Modify table and column names accordingly
-        texts = cursor.fetchall()
-
-        total_texts = len(texts)
-        MAX_TEXT_LENGTH = 100000
-
-        for i, text in enumerate(texts):
-            keywords = self.get_nnp(text[0])
-            if keywords is not None:
-                cursor.execute("UPDATE emlAttachments SET NNP = ? WHERE plain_text = ?", (keywords, text[0]))
-
-            progress_percent = (i + 1) / total_texts * 100
-            print(f"Processed {i}/{total_texts} texts ({progress_percent:.2f}%)", end='\r')
-
-        self.conn.commit()
-        
-        
-    def process_texts_pstAttachments(self):
-        # Process texts from the database
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT plain_text FROM pstAttachments")  # Modify table and column names accordingly
-        texts = cursor.fetchall()
-
-        total_texts = len(texts)
-        MAX_TEXT_LENGTH = 100000
-
-        for i, text in enumerate(texts):
-            keywords = self.get_nnp(text[0])
-            if keywords is not None:
-                cursor.execute("UPDATE pstAttachments SET NNP = ? WHERE plain_text = ?", (keywords, text[0]))
-
-            progress_percent = (i + 1) / total_texts * 100
-            print(f"Processed {i}/{total_texts} texts ({progress_percent:.2f}%)", end='\r')
-
-        self.conn.commit()
-        
-
-# extractor = NERExtractor('C:\\Users\\SeoJongChan\\Webtopsy\\cases\\1\\parsing.sqlite')
-# extractor.process_texts()
+extractor = NERExtractor('C:\\Users\\SeoJongChan\\Webtopsy\\cases\\1\\parsing.sqlite')
+extractor.process_texts()

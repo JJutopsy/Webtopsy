@@ -83,6 +83,7 @@ class KeywordExtractor:
                 print(f"Error processing text {i}/{total_texts}: {e}")
 
         self.conn.commit()
+<<<<<<< HEAD
     
     def extract_keywords_eml(self):
         cursor = self.conn.cursor()
@@ -143,3 +144,6 @@ class KeywordExtractor:
                 print(f"Error processing text {i}/{total_texts}: {e}")
 
         self.conn.commit()
+=======
+        
+>>>>>>> ce3bcb6e4c7c1bb96d407b6193471f7004700264

@@ -1,6 +1,6 @@
 import hashlib
 import sqlite3
-import time
+import re
 from pathlib import Path
 from io import BytesIO
 from .ole_extractor import OLEExtractor
@@ -12,7 +12,9 @@ from .pdf_extractor import PDFExtractor
 import zipfile
 import logging
 import os
-import tempfile
+
+def contains_hangul(text):
+    return bool(re.search('[가-힣]', text))
 
 def read_file_with_different_encodings(file_data):
     encodings = ['utf-8', 'iso-8859-1', 'cp949']  
@@ -44,12 +46,23 @@ def extract_text(file_data, ext):
         elif ext == ".pdf":
             extractor = PDFExtractor(file_data)
             text = extractor.get_text()
-        elif ext == ".eml":
-            return file_data
-        elif ext == ".pst":
-            return file_data
-        elif ext in [".txt", ".csv"]:
-            text = read_file_with_different_encodings(file_data)
+        elif ext in ['.txt', '.csv']:
+            # 파일 크기 제한 확인
+            if len(file_data) > 40 * 1024 * 1024:
+                logging.info(f"Skipping file {file_name} as it exceeds the size limit.")
+                return text
+
+            # 한글 포함 여부 확인
+            try:
+                decoded_text = read_file_with_different_encodings(file_data)
+                if not contains_hangul(decoded_text):
+                    logging.info(f"Skipping file {file_name} as it does not contain Hangul.")
+                    return text
+                else:
+                    text = decoded_text
+            except Exception as e:
+                logging.error(f"Error decoding file {file_name}: {e}")
+                return text
         elif ext == ".zip":
             try:
                 with zipfile.ZipFile(BytesIO(file_data), 'r') as zipf:
@@ -88,38 +101,6 @@ def save_metadata_and_blob_to_db(conn, metadata, blob_data):
     ''', metadata + (blob_data,))
     conn.commit()
 
-def save_metadata_and_blob_to_db_emlVersion(conn,fileinfo):
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO emlEmails (save_location, subject, date, sender, receiver, ctime, mtime, atime, hash, body)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''',fileinfo)
-    conn.commit()
-    
-def save_metadata_and_blob_to_db_emlAttachmentsVersion(conn, fileinfo):
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO emlAttachments (save_location, filename, hash, data, plain_text)
-        VALUES (?, ?, ?, ?, ?)
-    ''',fileinfo)
-    conn.commit()
-
-def save_metadata_and_blob_to_db_pstVersion(conn, fileinfo):
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO pstEmails (save_location, subject, date, sender, receiver, hash, body)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''',fileinfo)
-    conn.commit()
-    
-def save_metadata_and_blob_to_db_pstAttachmentsVersion(conn, fileinfo):
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO pstAttachments (save_location, subject, hash, data)
-        VALUES (?, ?, ?, ?)
-    ''',fileinfo)
-    conn.commit()
-
 def process_byte_data(byte_data, file_extension, conn):
     if file_extension.lower() in whitelist_extensions:
         try:
@@ -148,8 +129,11 @@ CREATE TABLE IF NOT EXISTS files (
     m_time TEXT NOT NULL,
     a_time TEXT NOT NULL,
     c_time TEXT NOT NULL,
+<<<<<<< HEAD
     tag TEXT,
     NNP TEXT,
+=======
+>>>>>>> ce3bcb6e4c7c1bb96d407b6193471f7004700264
     blob_data BLOB
 )
 ''')
