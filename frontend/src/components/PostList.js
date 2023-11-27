@@ -42,7 +42,7 @@ import DashTable from "./DashTable";
 
 function PostList() {
   const db_path =
-    "C:\\Users\\dswhd\\Webtopsy-2\\cases\\1\\parsing.sqlite";
+    "D:\\new_TeamJSD\\Webtocpy\\cases\\성심당 사건3\\parsing.sqlite";
   const [rows, setRows] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [inputValue, setInputValue] = useState("");

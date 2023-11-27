@@ -83,4 +83,63 @@ class KeywordExtractor:
                 print(f"Error processing text {i}/{total_texts}: {e}")
 
         self.conn.commit()
+    
+    def extract_keywords_eml(self):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT body FROM emlEmails")
+        texts = [text[0] for text in cursor.fetchall()]
+        total_texts = len(texts)
+
+        for i, text in enumerate(texts):
+            try:
+                keywords = self.get_top_words(text)
+                if keywords is not None:
+                    cursor.execute("UPDATE emlEmails SET tag = ? WHERE body = ?", (keywords, text))
+
+                progress_percent = (i + 1) / total_texts * 100
+                print(f"Processed {i}/{total_texts} texts ({progress_percent:.2f}%)", end='\r')
+
+            except Exception as e:
+                print(f"Error processing text {i}/{total_texts}: {e}")
+
+        self.conn.commit()
         
+    def extract_keywords_emlAttachments(self):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT plain_text FROM emlAttachments")
+        texts = [text[0] for text in cursor.fetchall()]
+        total_texts = len(texts)
+
+        for i, text in enumerate(texts):
+            try:
+                keywords = self.get_top_words(text)
+                if keywords is not None:
+                    cursor.execute("UPDATE emlAttachments SET tag = ? WHERE plain_text = ?", (keywords, text))
+
+                progress_percent = (i + 1) / total_texts * 100
+                print(f"Processed {i}/{total_texts} texts ({progress_percent:.2f}%)", end='\r')
+
+            except Exception as e:
+                print(f"Error processing text {i}/{total_texts}: {e}")
+
+        self.conn.commit()
+        
+    def extract_keywords_pstAttachments(self):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT plain_text FROM pstAttachments")
+        texts = [text[0] for text in cursor.fetchall()]
+        total_texts = len(texts)
+
+        for i, text in enumerate(texts):
+            try:
+                keywords = self.get_top_words(text)
+                if keywords is not None:
+                    cursor.execute("UPDATE pstAttachments SET tag = ? WHERE plain_text = ?", (keywords, text))
+
+                progress_percent = (i + 1) / total_texts * 100
+                print(f"Processed {i}/{total_texts} texts ({progress_percent:.2f}%)", end='\r')
+
+            except Exception as e:
+                print(f"Error processing text {i}/{total_texts}: {e}")
+
+        self.conn.commit()
