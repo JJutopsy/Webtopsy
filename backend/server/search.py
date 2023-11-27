@@ -25,10 +25,12 @@ def search_keyword():
 
     query = "SELECT * FROM files WHERE file_path LIKE ? OR plain_text LIKE ?"
     results = cursor.execute(query, ('%' + keyword + '%', '%' + keyword + '%')).fetchall()
+    print("이것은 리절트 값입니다:", results)
 
     conn.close()
 
     if not results:
+        print("이것은 리절트 값입니다:", results)
         return '검색 결과가 없습니다.', 404
 
     result_list = []
