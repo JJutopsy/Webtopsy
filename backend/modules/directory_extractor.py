@@ -11,10 +11,11 @@ from .hwp_extractor import HWPExtractor
 from .docx_extractor import DOCXExtractor
 from .pptx_extractor import PPTXExtractor
 from .xlsx_extractor import XLSXExtractor
-from .eml_extractor import EmlExtractor
-from .pst_extractor import PSTExtractor
 from .pdf_extractor import PDFExtractor
 import threading
+from . import parsing
+from .eml_extractor import EmlParser
+from .directory_pst_extractor import PSTParser
 
 db_thread_local = threading.local()
 
@@ -52,9 +53,9 @@ def extract_text(file_data, ext):
             extractor = PDFExtractor(file_data)
             text = extractor.get_text()
         elif ext == ".eml":
-            extractor = EmlExtractor(file_data)
-            extractor.parse_eml_file()
-            text = extractor.extract_body()
+            return file_data
+        elif ext == ".pst":
+            return file_data
         elif ext in [".txt", ".csv"]:
             text = read_file_with_different_encodings(file_data)
         elif ext == ".zip":
@@ -109,31 +110,93 @@ def process_byte_data(byte_data, file_extension, conn):
         except Exception as e:
             print(f"데이터 처리 중 오류 발생: {e}")
 
-def process_files_in_directory(directory, conn):
+def process_files_in_directory(directory, conn, parsingDBpath):
     for root, dirs, files in os.walk(directory):
         for file in files:
             file_path = os.path.join(root, file)
             file_extension = os.path.splitext(file)[1].lower()
             
-            
-            
             if file_extension in whitelist_extensions:
-                try:
-                    with open(file_path, 'rb') as f:
+                with open(file_path, 'rb') as f:
                         file_data = f.read()
-                        blob_data = sqlite3.Binary(file_data)
-                        hash_value = calculate_hash(file_data)
-                        plain_text = extract_text(file_data, file_extension)
-                        stat = os.stat(file_path)
-                        m_time = time.ctime(stat.st_mtime)
-                        a_time = time.ctime(stat.st_atime)
-                        c_time = time.ctime(stat.st_ctime)
-                        
-                        metadata = (file_path, hash_value, plain_text, m_time, a_time, c_time)
-                        save_metadata_and_blob_to_db(conn, metadata, blob_data)
+                        try:
+                            if file_extension == '.eml':
+                                emlfile = extract_text(file_data, '.eml') #eml일 경우 그냥 바이트 스트림 형식으로 된 eml 파일을 반환함
+                                # EML 데이터를 사용하여 EmlParser 인스턴스를 생성
+                                parser = EmlParser(emlfile)
+                                # EML 파일 정보 추출
+                                (subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body) = parser.process_eml()
+                                (attachments) = parser.extract_attachments()
+                                save_location = file_path
+                                emlfile_info = (save_location, subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body)
+                                logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
+                                save_metadata_and_blob_to_db_emlVersion(conn, emlfile_info)
+                                logging.info("Data saved to DB: %s", emlfile_info)  # DB에 데이터 저장 후 로깅
+                                if attachments:
+                                    for filename, content_type, body, plain_text in attachments:
+                                        Fn = filename
+                                        Ct = content_type
+                                        Body = body
+                                        pt = plain_text
+                                        md5_hash = calculate_hash(Body)
+                                        emlBlobData = sqlite3.Binary(Body)
+                                        emlAttachments_info = (save_location, Fn, md5_hash, emlBlobData, pt)
+                                        logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
+                                        save_metadata_and_blob_to_db_emlAttachmentsVersion(conn, emlAttachments_info)
+                                        logging.info("Data saved to DB: %s", emlfile_info)  # DB에 데이터 저장 후 로깅
+                            if file_extension == '.pst':
+                                pstfile = extract_text(file_data, '.pst')
+                                parser = PSTParser(pstfile,directory)
+                                parser.extract_emails_from_pst(conn)
+                                conn = sqlite3.connect(parsingDBpath)
+                                
+                            if file_extension != '.eml' and file_extension != '.pst':
+                                    with open(file_path, 'rb') as f:
+                                        file_data = f.read()
+                                        blob_data = sqlite3.Binary(file_data)
+                                        hash_value = calculate_hash(file_data)
+                                        plain_text = extract_text(file_data, file_extension)
+                                        stat = os.stat(file_path)
+                                        m_time = time.ctime(stat.st_mtime)
+                                        a_time = time.ctime(stat.st_atime)
+                                        c_time = time.ctime(stat.st_ctime)
+                                                
+                                        metadata = (file_path, hash_value, plain_text, m_time, a_time, c_time)
+                                        save_metadata_and_blob_to_db(conn, metadata, blob_data)
+                        except Exception as e:
+                            logging.error(f"Error processing file {file_path}: {e}")
 
-                except Exception as e:
-                    logging.error(f"Error processing file {file_path}: {e}")
+def save_metadata_and_blob_to_db_emlAttachmentsVersion(conn, fileinfo):
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO emlAttachments (save_location, filename, hash, data, plain_text)
+        VALUES (?, ?, ?, ?, ?)
+    ''',fileinfo)
+    conn.commit()
+
+def save_metadata_and_blob_to_db_emlVersion(conn,fileinfo):
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO emlEmails (save_location, subject, date, sender, receiver, ctime, mtime, atime, hash, body)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''',fileinfo)
+    conn.commit()
+
+def save_metadata_and_blob_to_db_pstVersion(conn, fileinfo):
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO pstEmails (save_location, subject, date, sender, receiver, hash, body)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''',fileinfo)
+    conn.commit()
+    
+def save_metadata_and_blob_to_db_pstAttachmentsVersion(conn, fileinfo):
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO pstAttachments (save_location, subject, filename, hash, data)
+        VALUES (?, ?, ?, ?, ?)
+    ''',fileinfo)
+    conn.commit()
 
 def process_directories(directories, parsingDBpath):
     try:
@@ -141,7 +204,7 @@ def process_directories(directories, parsingDBpath):
         conn = sqlite3.connect(parsingDBpath)
         
         for directory in directories:
-            process_files_in_directory(directory, conn)
+            process_files_in_directory(directory, conn, parsingDBpath)
         
     except sqlite3.Error as e:
         logging.error(f"Database error: {e}")
@@ -154,11 +217,28 @@ def process_directories(directories, parsingDBpath):
             conn.close()
 
     return 200, "Success"
-
+    
+# DB 연결 및 테이블 생성 부분에서 blob_data 컬럼 추가
+conn = sqlite3.connect('parsing.sqlite')
+cursor = conn.cursor()
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_path TEXT NOT NULL,
+    hash_value TEXT NOT NULL,
+    plain_text TEXT,
+    m_time TEXT NOT NULL,
+    a_time TEXT NOT NULL,
+    c_time TEXT NOT NULL,
+    blob_data BLOB
+)
+''')
 
 # 화이트리스트 확장자
 whitelist_extensions = ('.doc', '.docx', '.pptx', '.xlsx', '.pdf', '.hwp', '.eml',
     '.pst', '.ost', '.ppt', '.xls', '.csv', '.txt','.zip','.7z')
+
+conn.close()
 
 # get_parsing_db_path 함수 정의 (casedb에서 parsingDBpath 값을 조회)
 def get_parsing_db_path(case_id):

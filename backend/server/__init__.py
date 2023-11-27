@@ -7,9 +7,14 @@ from .comment import comment_bp
 from .files import files_bp
 from .newcase import newcase_bp
 from .case import case_bp
+# from .calendar_bp import calendar_bp
 from .db_thread import DBThread
 from .similarity import similarity_bp
 from .search import search_bp
+from .email import email_bp
+from .emlperson import emailperson_bp
+from .tag import tag_bp
+from .nnp import nnp_bp
 
 def create_app():
     app = Flask(__name__)
@@ -23,8 +28,13 @@ def create_app():
     app.register_blueprint(case_bp)
     app.register_blueprint(files_bp)
     app.register_blueprint(comment_bp)
-    app.register_blueprint(similarity_bp)
-    app.register_blueprint(search_bp)
+    app.register_blueprint(similarity_bp, url_prefix='/similarity')
+    app.register_blueprint(search_bp, url_prefix='/search')
+    app.register_blueprint(email_bp)
+    app.register_blueprint(emailperson_bp)
+    app.register_blueprint(tag_bp)
+    app.register_blueprint(nnp_bp)
+#    app.register_blueprint(calendar_bp)
 
     app.db_thread = DBThread()
 
