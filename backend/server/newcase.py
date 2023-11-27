@@ -4,7 +4,7 @@ import sqlite3
 import logging
 import threading
 import time
-from .db import init_casedb
+from .db import init_casedb, init_tables_db
 from modules import e01_extractor, dd_extractor, zip_extractor, directory_extractor
 
 newcase_bp = Blueprint('newcase', __name__)
@@ -64,81 +64,8 @@ def new_case():
 
     # 데이터베이스 연결 및 커서 생성
     parsing_conn = sqlite3.connect(parsingDBpath)
-    parsing_cursor = parsing_conn.cursor()
+    init_tables_db(parsingDBpath)
 
-    # 파싱 데이터베이스에 files 테이블 생성
-    parsing_cursor.execute('''
-    CREATE TABLE IF NOT EXISTS files (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        file_path TEXT NOT NULL,
-        hash_value TEXT NOT NULL,
-        plain_text TEXT,
-        m_time TEXT NOT NULL,
-        a_time TEXT NOT NULL,
-        c_time TEXT NOT NULL,
-        blob_data BLOB,
-        tag TEXT,
-        NNP TEXT
-    )
-    ''')
-    parsing_cursor.execute('''
-    CREATE TABLE IF NOT EXISTS comments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        post_id INTEGER,
-        username TEXT NOT NULL,
-        context TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        type TEXT NOT NULL
-    )
-    ''')
-    parsing_cursor.execute('''
-    CREATE TABLE IF NOT EXISTS emlEmails (
-        save_location TEXT,
-        subject TEXT,
-        date TEXT,     
-        sender TEXT,
-        receiver TEXT,
-        ctime TEXT,
-        mtime TEXT,
-        atime TEXT,
-        hash TEXT,
-        body TEXT,
-        tag TEXT,
-        NNP TEXT
-    )
-    ''')
-
-    parsing_cursor.execute('''
-    CREATE TABLE IF NOT EXISTS emlAttachments (
-        save_location TEXT,
-        filename TEXT,
-        hash TEXT,
-        data BLOB,
-        plain_text TEXT,
-        tag TEXT,
-        NNP TEXT
-    )
-    ''')
-    
-    parsing_cursor.execute('''
-    CREATE TABLE IF NOT EXISTS pstAttachments (
-        save_location TEXT,
-        subject TEXT,
-        filename TEXT,
-        hash TEXT,
-        data BLOB,
-        plain_text TEXT,
-        tag TEXT,
-        NNP TEXT
-    )
-    ''')
-    
-    parsing_cursor.execute('''
-    CREATE TABLE IF NOT EXISTS emlPerson (
-        emlPerson TEXT,
-        relatedPerson TEXT
-    )
-    ''')
     # 커밋 및 연결 닫기
     parsing_conn.commit()
     parsing_conn.close()
