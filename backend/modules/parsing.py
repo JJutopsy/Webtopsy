@@ -129,11 +129,8 @@ CREATE TABLE IF NOT EXISTS files (
     m_time TEXT NOT NULL,
     a_time TEXT NOT NULL,
     c_time TEXT NOT NULL,
-<<<<<<< HEAD
     tag TEXT,
     NNP TEXT,
-=======
->>>>>>> ce3bcb6e4c7c1bb96d407b6193471f7004700264
     blob_data BLOB
 )
 ''')
