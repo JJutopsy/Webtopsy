@@ -7,6 +7,9 @@ import {
   Stack,
   MenuItem,
   Tooltip,
+  AppBar,
+  Toolbar,
+  Paper,
 } from "@mui/material";
 import Form from "react-bootstrap/Form";
 import {
@@ -39,6 +42,7 @@ import CodeBlock from "./CodeBlock";
 import CommentsList from "./CommentsList";
 import Flag from "../pages/Flag";
 import DashTable from "./DashTable";
+import CodeWithComments from "./CodeWithComments";
 
 function PostList() {
   // URL에서 쿼리 스트링 추출
@@ -158,19 +162,143 @@ function PostList() {
 
   return (
     <>
+      <div class="topbar">
+
+
+        {!keyword ? (
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ fontWeight: "bold" }}
+          >
+            DashBoard
+          </Typography>
+        ) : (
+          <Typography
+
+            variant="h6"
+            component="div"
+            sx={{ fontWeight: "bold" }}
+          >
+            키워드 <mark>{keyword}</mark> 검색 결과 ({rows.length})
+          </Typography>
+        )}
+
+        <hr></hr>
+        <Box
+          sx={{
+            display: "flex",
+            width: "100%",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+        >
+          <Stack direction={"column"} spacing={1} width={"100%"}>
+            <Stack direction="row" spacing={1} width={"100%"}>
+              <InputGroup className="mb-3">
+                <DropdownButton
+                  as={InputGroup.Prepend}
+                  variant="outline-secondary"
+                  title="옵션"
+                  id="input-group-dropdown-1"
+                >
+                  <Dropdown.Item href="#">사람 이름</Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item href="#">조직 이름</Dropdown.Item>
+                </DropdownButton>
+                <Form.Control
+                  type="text"
+                  placeholder="Keyword Search "
+                  value={inputValue}
+                  onChange={handleInputValueChange}
+                  onKeyPress={handleKeyPress}
+                />
+                <Button onClick={handleSearch}>
+                  <SearchIcon /> 검색
+                </Button>
+              </InputGroup>
+            </Stack>
+            {!keyword || rows.length == 0 ? (
+              <div
+                style={{
+                  overflowY: "auto",
+                  flex: 1,
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}
+              >
+                {/* <DashTable /> */}
+              </div>
+            ) : (
+              <Box >
+                {tags
+                  .slice(0, showAll ? tags.length : 10)
+                  .map((tag, index) => (
+                    <Badge
+                      key={index}
+                      bg={selectedTag === tag ? "primary" : "secondary"}
+                      onClick={() =>
+                        setSelectedTag((prev) =>
+                          prev === tag ? null : tag
+                        )
+                      }
+                      style={{ cursor: "pointer", marginRight: "5px" }}
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                {showAll ? (
+                  <Badge onClick={handleHide} bg="danger" pill>
+                    접기..
+                  </Badge>
+                ) : (
+                  tags.length > 10 && (
+                    <Badge onClick={handleShowAll} bg="primary" pill>
+                      더보기..
+                    </Badge>
+                  )
+                )}
+              </Box>
+            )}
+          </Stack>
+        </Box>
+      </div>
       <Box
         sx={{
           display: "flex",
-          width:"100%"
+          width: "100%"
         }}
       >
-        <Box width={"80%"} sx={{ flexGrow: 1, paddingRight: "20px" }}>
+
+        <Box sx={{ flexGrow: 1, backgroundColor: "white" }} width={"15%"}>
+
+          <br />
+          <Container component="main">
+            <center>
+              <Typography
+                variant="h6"
+                component="div"
+                sx={{ fontWeight: "bold" }}
+              >
+                북마크
+              </Typography>
+            </center>
+            <hr></hr>
+            <Box>
+
+            </Box>
+          </Container>
+        </Box>
+
+        <Box width={selectedId ? "85%" : "70%"} sx={{ flexGrow: 1, paddingRight: "20px" }}>
+
           <div style={{ display: "flex" }}>
             <div
               style={{
-                width: selectedText ? "50%" : "100%",
+                width: selectedText ? "40%" : "100%",
               }}
             >
+
               <div
                 style={{
 
@@ -181,116 +309,16 @@ function PostList() {
                   paddingTop: "20px",
                 }}
               >
-              <div class="topbar" style={{bottom: 0, left:0,position:"fixed", width:"80%", background:"white"}}>
 
-
-                {!keyword ? (
-                  <Typography
-                    variant="h6"
-                    component="div"
-                    sx={{ fontWeight: "bold" }}
-                  >
-                    DashBoard
-                  </Typography>
-                ) : (
-                  <Typography
-                  
-                    variant="h6"
-                    component="div"
-                    sx={{ fontWeight: "bold" }}
-                  >
-                    키워드 <mark>{keyword}</mark> 검색 결과 ({rows.length})
-                  </Typography>
-                )}
-
-                <hr></hr>
-                <Box
-                  sx={{
-                    display: "flex",
-                    width: "100%",
-                    justifyContent: "center",
-                    padding: "20px",
-                  }}
-                >
-                  <Stack direction={"column"} spacing={1} width={"100%"}>
-                    <Stack direction="row" spacing={1} width={"100%"}>
-                      <InputGroup className="mb-3">
-                        <DropdownButton
-                          as={InputGroup.Prepend}
-                          variant="outline-secondary"
-                          title="옵션"
-                          id="input-group-dropdown-1"
-                        >
-                          <Dropdown.Item href="#">사람 이름</Dropdown.Item>
-                          <Dropdown.Divider />
-                          <Dropdown.Item href="#">조직 이름</Dropdown.Item>
-                        </DropdownButton>
-                        <Form.Control
-                          type="text"
-                          placeholder="Keyword Search "
-                          value={inputValue}
-                          onChange={handleInputValueChange}
-                          onKeyPress={handleKeyPress}
-                        />
-                        <Button onClick={handleSearch}>
-                          <SearchIcon /> 검색
-                        </Button>
-                      </InputGroup>
-                    </Stack>
-                    {!keyword || rows.length == 0 ? (
-                      <div
-                        style={{
-                          overflowY: "auto",
-                          flex: 1,
-                          scrollbarWidth: "none",
-                          msOverflowStyle: "none",
-                        }}
-                      >
-                        <DashTable />
-                      </div>
-                    ) : (
-                      <Box >
-                        {tags
-                          .slice(0, showAll ? tags.length : 10)
-                          .map((tag, index) => (
-                            <Badge
-                              key={index}
-                              bg={selectedTag === tag ? "primary" : "secondary"}
-                              onClick={() =>
-                                setSelectedTag((prev) =>
-                                  prev === tag ? null : tag
-                                )
-                              }
-                              style={{ cursor: "pointer", marginRight: "5px" }}
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
-                        {showAll ? (
-                          <Badge onClick={handleHide} bg="danger" pill>
-                            접기..
-                          </Badge>
-                        ) : (
-                          tags.length > 10 && (
-                            <Badge onClick={handleShowAll} bg="primary" pill>
-                              더보기..
-                            </Badge>
-                          )
-                        )}
-                      </Box>
-                    )}
-                  </Stack>
-                </Box>
-                </div>
                 <div
                   style={{
                     overflowY: "auto",
                     flex: 1,
                     scrollbarWidth: "none",
                     msOverflowStyle: "none",
-
                   }}
                 >
+
                   {rows
                     .filter(
                       (row) =>
@@ -440,127 +468,120 @@ function PostList() {
               <div
                 style={{
                   height: "100vh",
-                  width: "50%",
+                  width: "60%",
                   display: "flex",
                   flexDirection: "column",
                   overflow: "auto",
                   paddingLeft: "20px",
                 }}
-              >
-                <br></br>
-                <br></br>
-                <Tabs
-                  defaultActiveKey="plain"
-                  id="justify-tab-example"
-                  className="mb-3"
-                  justify
-                  style={{
-                    position: "sticky",
-                    top: 50,
-                    backgroundColor: "#E9EDF5",
-                  }} // 이 부분을 추가하세요.
-                >
-                  <Tab eventKey="plain" title="본문">
-                    <div style={{ overflow: "auto" }}>
-                      <SyntaxHighlighter
-                        language="text" // 텍스트 언어를 사용
-                        style={base16AteliersulphurpoolLight} // solarizedlight 스타일을 사용
-                        showLineNumbers // 라인 번호를 표시
-                        wrapLongLines // 긴 줄을 감싸기
-                      >
-                        {selectedText}
-                      </SyntaxHighlighter>
-                    </div>
-                  </Tab>
+              ><Paper>
+                  <Tabs
+                    defaultActiveKey="plain"
+                    id="justify-tab-example"
+                    className="mb-3"
+                    justify
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#E9EDF5",
+                    }}
+                  >
+                    <Tab eventKey="plain" title="본문">
+                      <CodeWithComments code={selectedText}></CodeWithComments>
+                    </Tab>
 
-                  <Tab eventKey="fileinfo" title="메타 데이터 정보">
-                    <Table striped bordered hover>
-                      <thead>
-                        <tr>
-                          <th>메타데이터</th>
-                          <th>값</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <th>파일 명</th>
-                          <th></th>
-                        </tr>
-                        <tr>
-                          <th>파일 출처</th>
-                          <th>
-                            <Badge bg="primary">고수봉 대리.zip</Badge>
-                            ~\카카오톡 받은 파일\골절이란.hwp
-                          </th>
-                        </tr>
-                        <tr>
-                          <th>파일 경로</th>
-                          <th>
-                            <pre>
-                              C:\Users\SeoJongChan\Documents\카카오톡 받은
-                              파일\골절이란.hwp
-                            </pre>
-                          </th>
-                        </tr>
-                        <tr>
-                          <th>
-                            <pre>생성 시간</pre>
-                          </th>
-                          <th>2021-10-23 08:12:56</th>
-                        </tr>
-                        <tr>
-                          <th>
-                            <pre>수정 시간</pre>
-                          </th>
-                          <th>2021-10-23 08:12:56</th>
-                        </tr>
-                        <tr>
-                          <th>
-                            <pre>마지막 접근 시간</pre>
-                          </th>
-                          <th>2021-10-24 15:22:06</th>
-                        </tr>
-                        <tr>
-                          <th>해시값<br></br>(sha-256)</th>
-                          <th>
-                            5af2943af85e379b01a77217a15dbbfa71a12fce2ba626f5e136357d57f33213
-                          </th>
-                        </tr>
-                      </tbody>
-                    </Table>
-                  </Tab>
-                </Tabs>
+                    <Tab eventKey="fileinfo" title="메타 데이터 정보">
+
+                      <Table striped bordered hover>
+                        <thead>
+                          <tr>
+                            <th>메타데이터</th>
+                            <th>값</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <th>파일 명</th>
+                            <th></th>
+                          </tr>
+                          <tr>
+                            <th>파일 출처</th>
+                            <th>
+                              <Badge bg="primary">고수봉 대리.zip</Badge>
+                              ~\카카오톡 받은 파일\골절이란.hwp
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>파일 경로</th>
+                            <th>
+                              <pre>
+                                C:\Users\SeoJongChan\Documents\카카오톡 받은
+                                파일\골절이란.hwp
+                              </pre>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <pre>생성 시간</pre>
+                            </th>
+                            <th>2021-10-23 08:12:56</th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <pre>수정 시간</pre>
+                            </th>
+                            <th>2021-10-23 08:12:56</th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <pre>마지막 접근 시간</pre>
+                            </th>
+                            <th>2021-10-24 15:22:06</th>
+                          </tr>
+                          <tr>
+                            <th>해시값<br></br>(sha-256)</th>
+                            <th>
+                              5af2943af85e379b01a77217a15dbbfa71a12fce2ba626f5e136357d57f33213
+                            </th>
+                          </tr>
+                        </tbody>
+                      </Table>
+                    </Tab>
+                  </Tabs>
+                </Paper>
               </div>
             )}
           </div>
         </Box>
-        <Box sx={{ flexGrow: 1, backgroundColor: "white" }} width={"20%"}>
-          <br />
-          <br></br>
-          <Container component="main">
-            <center>
-              <Typography
-                variant="h6"
-                component="div"
-                sx={{ fontWeight: "bold" }}
-              >
-                {selectedId ? "코멘트" : "최근 코멘트"}
-              </Typography>
-            </center>
-            <hr></hr>
-            <Box>
-              {selectedId ? (
-                <Comment
-                  selectedId={selectedId}
-                  onCommentCount={handleCommentCount}
-                  db_path={db_path}
-                ></Comment>
-              ) : (
-                <CommentsList db_path={db_path}></CommentsList>
-              )}
-            </Box>
-          </Container>
-        </Box>
+        {!selectedId &&
+          <Box sx={{ flexGrow: 1, backgroundColor: "white" }} width={"15%"}>
+            <br />
+            <Container component="main">
+              <center>
+                <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{ fontWeight: "bold" }}
+                >
+                  {selectedId ? "코멘트" : "최근 코멘트"}
+                </Typography>
+              </center>
+              <hr></hr>
+              <Box>
+                {selectedId ? (
+                  <Comment
+                    selectedId={selectedId}
+                    onCommentCount={handleCommentCount}
+                    db_path={db_path}
+                  ></Comment>
+                ) : (
+                  <CommentsList db_path={db_path}></CommentsList>
+                )}
+              </Box>
+            </Container>
+          </Box>
+        }
+
       </Box>
     </>
   );

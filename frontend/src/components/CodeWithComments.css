@@ -1,0 +1,16 @@
+.line {
+    color: grey;
+    cursor: pointer;
+    padding-right: 15px;
+  }
+  
+  .line:hover {
+    color: black;
+    font-weight: bold;
+  }
+  .dropdown-toggle::after {
+    display: none;
+}
+.block{
+    width: 40px;
+}

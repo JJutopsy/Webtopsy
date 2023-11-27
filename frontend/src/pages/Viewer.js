@@ -1,17 +1,77 @@
 import React, { useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
-import { Box, Typography } from "@mui/material";
-
+import { AppBar, Box, Button, Stack, Toolbar, Typography } from "@mui/material";
+import { Tab, Tabs } from 'react-bootstrap';
 import PostList from "../components/PostList";
 import CommentsList from "../components/CommentsList";
+import './Viewer.css'
+import IconButton from '@material-ui/core/IconButton';
+import SettingsIcon from '@material-ui/icons/Settings';
+import NotificationsIcon from '@material-ui/icons/Notifications';
+import HelpIcon from '@material-ui/icons/Help';
 
 export default function Viewer() {
+
+  const [key, setKey] = useState('first');
+
   return (
     <>
-      <Box sx={{ display: "flex", backgroundColor: "#E9EDF5" }}>
-            <PostList />
-      </Box>
+      <div style={{ position: "sticky", top: 0, zIndex: 1 }}>
+        <AppBar position="sticky" style={{ height: '50px', backgroundColor: '#0d6efd', boxShadow: 'none' }}>
+          <Toolbar style={{ minHeight: '50px', display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex' }}>
+              <Stack direction={'row'} spacing={1}>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px' }}>
+                  Webtopsy
+                </Typography>
+
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px' }}>
+                  |
+                </Typography>
+              </Stack>
+            </div>
+            <div>
+              <Stack direction={'row'} spacing={1}>
+                <Button color="inherit">TimeZone : KST (UTC+9)</Button>
+                <IconButton color="inherit">
+                  <SettingsIcon />
+                </IconButton>
+                <IconButton color="inherit">
+                  <NotificationsIcon />
+                </IconButton>
+                <IconButton color="inherit">
+                  <HelpIcon />
+                </IconButton>
+                <Button color="inherit">UserName</Button>
+              </Stack>
+            </div>
+          </Toolbar>
+        </AppBar>
+        <Tabs
+          id="controlled-tab-example"
+          activeKey={key}
+          onSelect={(k) => setKey(k)}
+          style={{
+            position: "sticky",
+            top: 50,
+            backgroundColor:"white",
+            zIndex: 10
+          }}
+        >
+          <Tab eventKey="first" title="Search & Review">
+            <Box sx={{ backgroundColor: "#E9EDF5" }}>
+              <PostList />
+            </Box>
+          </Tab>
+          <Tab eventKey="second" title="Email Aduit">
+            <p>Email Aduit Page</p>
+          </Tab>
+          <Tab eventKey="third" title="DashBoard">
+            <p>Dashboard</p>
+          </Tab>
+        </Tabs>
+      </div>
     </>
   );
 }
