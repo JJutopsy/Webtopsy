@@ -32,4 +32,3 @@ log.txt
 cases/
 *.sqlite
 __pycache__/
-jdk-21.0.1/
