@@ -76,9 +76,9 @@ def new_case():
         m_time TEXT NOT NULL,
         a_time TEXT NOT NULL,
         c_time TEXT NOT NULL,
+        blob_data BLOB,
         tag TEXT,
-        NNP TEXT,
-        blob_data BLOB
+        NNP TEXT
     )
     ''')
     parsing_cursor.execute('''

@@ -28,7 +28,11 @@ class EmlParser:
             if filename:
                 filename = decode_header(filename)[0][0]
                 if isinstance(filename, bytes):
-                    filename = filename.decode('utf-8')
+                    #filename = filename.decode('utf-8')
+                    try:
+                        filename = filename.decode('utf-8')
+                    except UnicodeDecodeError:
+                        filename = filename.decode('euc-kr', errors='ignore')
                 content_type = part.get_content_type()
                 body = part.get_payload(decode=True)
                 
@@ -91,7 +95,11 @@ class EmlParser:
         if self.msg['Subject']:
             subject = decode_header(self.msg['Subject'])[0][0]
             if isinstance(subject, bytes):
-                subject = subject.decode('utf-8')
+                try:
+                    subject = subject.decode('utf-8')
+                except UnicodeDecodeError:
+                    subject = subject.decode('euc-kr', errors='ignore')
+
         else:
             subject = '제목 없음'
         date_str = self.msg['Date']
@@ -101,7 +109,12 @@ class EmlParser:
         # 'From' 필드 처리
         from_ = decode_header(self.msg['From'])[0][0]
         if isinstance(from_, bytes):
-            from_ = from_.decode('utf-8')
+            try:
+                from_ = from_.decode('utf-8')
+            except UnicodeDecodeError:
+                from_ = from_.decode('euc-kr', errors='ignore')
+
+            
 
         # ';'를 ','로 바꾸기
         from_ = from_.replace(';', ',')
@@ -112,7 +125,7 @@ class EmlParser:
         # 'To' 필드 처리
         to = decode_header(self.msg['To'])[0][0]
         if isinstance(to, bytes):
-            to = to.decode('utf-8')
+            to = to.decode('utf-8', errors='ignore')
         to = to.replace('<', '').replace('>', '').strip()
 
         # ';'를 ','로 바꾸기
@@ -129,7 +142,7 @@ class EmlParser:
 '''
 if __name__ == "__main__":
     # EML 파일을 바이트 스트림으로 읽어옴
-    with open(r"D:\\과제제출파일\\강대명 멘토\\eml_pst\\권순형 그에대해 알아보자.eml", "rb") as eml_file:
+    with open(r"C:\\Users\\ksh88\\OneDrive\\문서\\카카오톡 받은 파일\\FW_ ORD11.089.w3x_230914\\FW_ ORD11.089.w3x_230914\\20170511_11991_제7기 IP 마이스터프로그램 모집공고(~6_9).eml", "rb") as eml_file:
         eml_data = eml_file.read()
 
         # EML 데이터를 사용하여 EmlParser 인스턴스를 생성
@@ -137,7 +150,7 @@ if __name__ == "__main__":
 
         # EML 파일 정보 추출
         subject, date, from_, to, ctime, mtime, atime, hash_value, mail_body = parser.process_eml()
-        attachments = parser.extract_attachments()
+        #attachments = parser.extract_attachments()
 
         # 추출한 정보 출력
         print("Subject:", subject)
@@ -147,12 +160,14 @@ if __name__ == "__main__":
         print("Mail Body:", mail_body)
         print("Hash:", hash_value)
 
-        if attachments:
-            print("Attachments:")
-            for filename, content_type, body, text_content in attachments:
-                print("  Filename:", filename)
-                print("  Content Type:", content_type)
-                print("  Body:", body)
-                print("  Text Content:", text_content)
-
+        # if attachments:
+        #     print("Attachments:")
+        #     for filename, content_type, body, text_content in attachments:
+        #         print("  Filename:", filename)
+        #         print("  Content Type:", content_type)
+        #         print("  Body:", body)
+        #         print("  Text Content:", text_content)
 '''
+
+
+
