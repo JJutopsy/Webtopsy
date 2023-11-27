@@ -185,6 +185,3 @@ class NERExtractor:
 
         self.conn.commit()
         self.conn.close()
-
-extractor = NERExtractor('C:\\Users\\SeoJongChan\\Webtopsy\\cases\\1\\parsing.sqlite')
-extractor.process_texts()
