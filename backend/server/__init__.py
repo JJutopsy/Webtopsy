@@ -15,6 +15,7 @@ from .email import email_bp
 from .emlperson import emailperson_bp
 from .tag import tag_bp
 from .nnp import nnp_bp
+from .ismatch import ismatch_bp
 
 def create_app():
     app = Flask(__name__)
@@ -34,6 +35,7 @@ def create_app():
     app.register_blueprint(emailperson_bp)
     app.register_blueprint(tag_bp)
     app.register_blueprint(nnp_bp)
+    app.register_blueprint(ismatch_bp)
 #    app.register_blueprint(calendar_bp)
 
     app.db_thread = DBThread()

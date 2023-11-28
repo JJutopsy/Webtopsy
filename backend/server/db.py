@@ -69,6 +69,7 @@ def init_tables_db(db_path):
         a_time TEXT NOT NULL,
         c_time TEXT NOT NULL,
         blob_data BLOB,
+        isMatch TEXT,
         tag TEXT,
         nnp TEXT
     )
@@ -109,6 +110,7 @@ def init_tables_db(db_path):
         hash TEXT,
         data BLOB,
         plain_text TEXT,
+        isMatch TEXT,
         tag TEXT,
         NNP TEXT
     )
@@ -122,6 +124,7 @@ def init_tables_db(db_path):
         hash TEXT,
         data BLOB,
         plain_text TEXT,
+        isMatch TEXT,
         tag TEXT,
         NNP TEXT
     )

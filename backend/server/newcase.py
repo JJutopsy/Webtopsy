@@ -77,6 +77,7 @@ def new_case():
         a_time TEXT NOT NULL,
         c_time TEXT NOT NULL,
         blob_data BLOB,
+        isMatch TEXT,
         tag TEXT,
         NNP TEXT
     )
@@ -115,6 +116,7 @@ def new_case():
         hash TEXT,
         data BLOB,
         plain_text TEXT,
+        isMatch TEXT,
         tag TEXT,
         NNP TEXT
     )
@@ -128,6 +130,7 @@ def new_case():
         hash TEXT,
         data BLOB,
         plain_text TEXT,
+        isMatch TEXT,
         tag TEXT,
         NNP TEXT
     )
