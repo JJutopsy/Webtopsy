@@ -130,7 +130,9 @@ def init_tables_db(db_path):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS emlPerson (
         emlPerson TEXT,
-        relatedPerson TEXT
+        relatedPerson TEXT,
+        seCount INTEGER,
+        reCount INTEGER
     )
     ''')
     

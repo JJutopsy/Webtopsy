@@ -136,7 +136,9 @@ def new_case():
     parsing_cursor.execute('''
     CREATE TABLE IF NOT EXISTS emlPerson (
         emlPerson TEXT,
-        relatedPerson TEXT
+        relatedPerson TEXT,
+        seCount INTEGER,
+        reCount INTEGER
     )
     ''')
     # 커밋 및 연결 닫기
