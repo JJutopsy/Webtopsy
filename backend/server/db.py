@@ -131,5 +131,17 @@ def init_tables_db(db_path):
         relatedPerson TEXT
     )
     ''')
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS MediaFiles (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        DocumentID INTEGER,
+        OriginalFileName TEXT,
+        SourceFileName TEXT,       
+        SHA256Hash TEXT,
+        FileSize INTEGER,
+        FileData BLOB,
+        FOREIGN KEY(DocumentID) REFERENCES DocumentMetadata(ID)
+    )
+    """)
     conn.commit()
     conn.close()
