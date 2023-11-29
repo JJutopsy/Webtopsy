@@ -163,28 +163,13 @@ function PostList() {
   return (
     <>
       <div class="topbar">
-
-
-        {!keyword ? (
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ fontWeight: "bold" }}
-          >
-            DashBoard
-          </Typography>
-        ) : (
-          <Typography
-
-            variant="h6"
-            component="div"
-            sx={{ fontWeight: "bold" }}
-          >
-            키워드 <mark>{keyword}</mark> 검색 결과 ({rows.length})
-          </Typography>
-        )}
-
-        <hr></hr>
+        {/* <Typography
+          variant="h6"
+          component="div"
+          sx={{ fontWeight: "bold" }}
+        >
+          키워드 <mark>{keyword}</mark> 검색 결과 ({rows.length})
+        </Typography> */}
         <Box
           sx={{
             display: "flex",
@@ -196,6 +181,14 @@ function PostList() {
           <Stack direction={"column"} spacing={1} width={"100%"}>
             <Stack direction="row" spacing={1} width={"100%"}>
               <InputGroup className="mb-3">
+                
+                <Form.Control
+                  type="text"
+                  placeholder="Keyword Search "
+                  value={inputValue}
+                  onChange={handleInputValueChange}
+                  onKeyPress={handleKeyPress}
+                />
                 <DropdownButton
                   as={InputGroup.Prepend}
                   variant="outline-secondary"
@@ -206,13 +199,6 @@ function PostList() {
                   <Dropdown.Divider />
                   <Dropdown.Item href="#">조직 이름</Dropdown.Item>
                 </DropdownButton>
-                <Form.Control
-                  type="text"
-                  placeholder="Keyword Search "
-                  value={inputValue}
-                  onChange={handleInputValueChange}
-                  onKeyPress={handleKeyPress}
-                />
                 <Button onClick={handleSearch}>
                   <SearchIcon /> 검색
                 </Button>
@@ -262,6 +248,7 @@ function PostList() {
             )}
           </Stack>
         </Box>
+      <hr/>
       </div>
       <Box
         sx={{
@@ -269,7 +256,7 @@ function PostList() {
           width: "100%"
         }}
       >
-
+        
         <Box sx={{ flexGrow: 1, backgroundColor: "white" }} width={"15%"}>
 
           <br />
