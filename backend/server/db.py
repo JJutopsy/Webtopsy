@@ -143,5 +143,11 @@ def init_tables_db(db_path):
         FOREIGN KEY(DocumentID) REFERENCES DocumentMetadata(ID)
     )
     """)
+    cursor.execute("""
+            CREATE TABLE IF NOT EXISTS documentmetadata (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filename TEXT
+            );
+        """)
     conn.commit()
     conn.close()
