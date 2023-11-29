@@ -15,11 +15,16 @@ class EmailSearcher:
         try:
             # emlEmails 테이블에서 date 컬럼을 오름차순으로 정렬하여 데이터 가져오기
             query = f'''
-                SELECT subject, strftime('%Y-%m-%d %H:%M:%S', date) as formatted_date,
-                    sender, receiver, body
-                FROM emlEmails
-                WHERE (sender LIKE '%' || ? || '%' OR receiver LIKE '%' || ? || '%')
-                    AND (sender LIKE '%' || ? || '%' OR receiver LIKE '%' || ? || '%')
+                SELECT e.subject, strftime('%Y-%m-%d %H:%M:%S', e.date) as formatted_date,
+                    e.sender, e.receiver, e.body, 
+                    CASE
+                        WHEN e.save_location LIKE '%.eml%' THEN (SELECT a_eml.filename FROM emlAttachments a_eml WHERE a_eml.save_location = e.save_location LIMIT 1)
+                        WHEN e.save_location NOT LIKE '%.%' THEN (SELECT a_pst.filename FROM pstAttachments a_pst WHERE a_pst.subject = e.subject LIMIT 1)
+                        ELSE NULL
+                    END as attachment_filename
+                FROM emlEmails e
+                WHERE (e.sender LIKE '%' || ? || '%' OR e.receiver LIKE '%' || ? || '%')
+                    AND (e.sender LIKE '%' || ? || '%' OR e.receiver LIKE '%' || ? || '%')
                 ORDER BY formatted_date ASC
             '''
             cursor.execute(query, (self.name, self.name, self.related_person, self.related_person))
@@ -33,13 +38,14 @@ class EmailSearcher:
 
             json_data = []
             for email in emails:
-                subject, date, sender, receiver, body = email
+                subject, date, sender, receiver, body, attachment_filename = email
                 email_data = {
                     "Subject": subject,
                     "Date": date,
                     "Sender": sender,
                     "Receiver": receiver,
-                    "Body": body
+                    "Body": body,
+                    "Attachment": attachment_filename  # 첨부파일 정보 추가
                 }
                 json_data.append(email_data)
 
