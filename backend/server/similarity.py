@@ -21,7 +21,7 @@ def similarity_analysis():
         # 메타데이터 처리 및 해시 계산
         process_files(conn)
         hashes, key_hashes = calculate_hashes_from_db(conn, key_document_id)
-        # 유사한 미디어 파일 찾기
+        # 유사한 미디어 파일이 포함된 문서 찾기
         similar_media = find_similar_media(hashes, key_hashes, key_document_id)
         
         # 완전히 동일한 문서 찾기
