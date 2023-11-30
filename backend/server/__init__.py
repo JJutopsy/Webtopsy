@@ -35,6 +35,7 @@ def create_app():
     app.register_blueprint(emailperson_bp)
     app.register_blueprint(tag_bp)
     app.register_blueprint(nnp_bp)
+    app.register_blueprint(xml_bp)
 #    app.register_blueprint(calendar_bp)
 
 
