@@ -89,6 +89,19 @@ def process_files(db_path):
     with sqlite3.connect(db_path) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS MediaFiles (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                DocumentID INTEGER,
+                OriginalFileName TEXT,
+                SourceFileName TEXT,
+                SHA256Hash TEXT,
+                FileSize INTEGER,
+                FileData BLOB
+            )
+        """)
+        conn.commit()
         skipped_files = []
 
         cursor.execute("SELECT id, file_path, blob_data FROM files")
@@ -101,7 +114,7 @@ def process_files(db_path):
             if is_ooxml(file_path):
                 for xml_file in ['docProps/app.xml', 'docProps/core.xml']:
                     metadata = parse_metadata(blob_data, xml_file)
-                    save_metadata(conn, file_path, metadata)
+                    save_metadata(conn, os.path.basename(file_path), metadata)
                 extract_media_from_blob(document_id, blob_data, source_file_name, cursor, skipped_files)
 
     return skipped_files
