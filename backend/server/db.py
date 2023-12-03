@@ -25,7 +25,7 @@ def get_db():
 def initialize_database():
     conn, cursor = get_db()
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
+        CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL,
         email TEXT NOT NULL,
@@ -42,7 +42,7 @@ def init_casedb():
     conn = sqlite3.connect('casedb.sqlite')
     cursor = conn.cursor()
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS cases (
+        CREATE TABLE IF NOT EXISTS cases (
         id INTEGER PRIMARY KEY,
         casename TEXT NOT NULL,
         caseinfo TEXT,
@@ -58,9 +58,9 @@ def init_tables_db(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    # files 테이블 생성
+    # 파싱 데이터베이스에 files 테이블 생성
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS files (
+        CREATE TABLE IF NOT EXISTS files (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         file_path TEXT NOT NULL,
         owner TEXT,
@@ -71,45 +71,10 @@ def init_tables_db(db_path):
         c_time TEXT NOT NULL,
         blob_data BLOB,
         tag TEXT,
-        nnp TEXT
+        NNP TEXT
     )
     ''')
-    
-    # artifacts 테이블 생성
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS artifacts (
-        name TEXT,
-        text TEXT,
-        m_time TEXT,
-        a_time TEXT,
-        c_time TEXT
-    )
-    ''')
-    
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS emlEmails (
-        save_location TEXT,
-        md5_hash TEXT,
-        subject TEXT,
-        date TEXT,
-        sender TEXT,
-        receiver TEXT,
-        ctime TEXT,
-        mtime TEXT,
-        atime TEXT,
-        mail_body TEXT
-    )
-    ''')
-
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS emlAttachments (
-        email_save_location TEXT,
-        filename TEXT,
-        hash TEXT,
-        data BLOB
-    )
-    ''')
-    cursor.execute("""
         CREATE TABLE IF NOT EXISTS comments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         post_id INTEGER,
@@ -118,6 +83,54 @@ def init_tables_db(db_path):
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         type TEXT NOT NULL
     )
-    """)
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS emlEmails (
+        save_location TEXT,
+        subject TEXT,
+        date TEXT,     
+        sender TEXT,
+        receiver TEXT,
+        ctime TEXT,
+        mtime TEXT,
+        atime TEXT,
+        hash TEXT,
+        body TEXT,
+        tag TEXT,
+        NNP TEXT
+    )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS emlAttachments (
+        save_location TEXT,
+        filename TEXT,
+        hash TEXT,
+        data BLOB,
+        plain_text TEXT,
+        tag TEXT,
+        NNP TEXT
+    )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS pstAttachments (
+        save_location TEXT,
+        subject TEXT,
+        filename TEXT,
+        hash TEXT,
+        data BLOB,
+        plain_text TEXT,
+        tag TEXT,
+        NNP TEXT
+    )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS emlPerson (
+        emlPerson TEXT,
+        relatedPerson TEXT
+    )
+    ''')
     conn.commit()
     conn.close()

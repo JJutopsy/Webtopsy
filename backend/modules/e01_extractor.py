@@ -7,6 +7,8 @@ import sqlite3
 from . import parsing
 from datetime import datetime
 import threading
+from .eml_extractor import EmlParser
+from .pst_eml_extractor import PSTParser
 
 db_thread_local = threading.local()
 
@@ -85,27 +87,78 @@ def extract_file(directory_entry, fs_info, file_name, relative_path, db_path):
         ext = os.path.splitext(file_name)[1].lower()  # 파일 확장자 추출
         conn = get_db_connection(db_path)
 
-        c_time, m_time, a_time = get_file_metadata(directory_entry)
-        logging.info("File Metadata - Creation Time: %s, Modification Time: %s, Access Time: %s", c_time, m_time, a_time)
+        if ext == '.eml':
+            emlfile = parsing.extract_text(file_data, ext) #eml일 경우 그냥 바이트 스트림 형식으로 된 eml 파일을 반환함
+            # EML 데이터를 사용하여 EmlParser 인스턴스를 생성
+            parser = EmlParser(emlfile)
 
-        file_text = parsing.extract_text(file_data, ext)  # 파일 확장자 전달
-        
-        hash_value = parsing.calculate_hash(file_data)  
-        logging.info("Calculated hash: %s", hash_value)  # 계산된 해시 값 로깅
+            # EML 파일 정보 추출
+            (subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body) = parser.process_eml()
+            (attachments) = parser.extract_attachments()
+            
+            save_location = os.path.join(relative_path, file_name)
+               
+            emlfile_info = (save_location, subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body)
+            
+            logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
+            parsing.save_metadata_and_blob_to_db_emlVersion(conn, emlfile_info)
+            logging.info("Data saved to DB: %s", emlfile_info)  # DB에 데이터 저장 후 로깅
+            
+            if attachments:
+                for filename, content_type, body, plain_text in attachments:
+                    Fn = filename
+                    Ct = content_type
+                    Body = body
+                    pt = plain_text
+                    md5_hash = parsing.calculate_hash(Body)
+                    emlBlobData = sqlite3.Binary(Body)
+                    emlAttachments_info = (save_location, Fn, md5_hash, emlBlobData, pt)
+                    logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
+                    parsing.save_metadata_and_blob_to_db_emlAttachmentsVersion(conn, emlAttachments_info)
+                    logging.info("Data saved to DB: %s", emlAttachments_info)  # DB에 데이터 저장 후 로깅
+           
+        if ext == ".pst":
+            pstfile = parsing.extract_text(file_data, ext)
+            parser = PSTParser(pstfile)
+            psteml = parser.extract_emails_from_pst()
+            save_location = os.path.join(relative_path, file_name)
+            if psteml:
+                for pstdata in psteml:
+                    subject = pstdata['subject']
+                    sender = pstdata['sender']
+                    receiver = pstdata['receiver']
+                    body = pstdata['body']
+                    date = pstdata['date']
+                    ctime = pstdata['ctime']
+                    mtime = pstdata['mtime']
+                    atime = pstdata['atime']
+                    hash = parser.calculate_hash(body)
+                    pst_info = (save_location, subject, date, sender, receiver, ctime, mtime, atime, hash, body)
+                    logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
+                    parsing.save_metadata_and_blob_to_db_emlVersion(conn, pst_info)
+                    logging.info("Data saved to DB: %s", pst_info)  # DB에 데이터 저장 후 로깅
+            
+        if ext != '.eml' and ext != '.pst':
+            c_time, m_time, a_time = get_file_metadata(directory_entry)
+            logging.info("File Metadata - Creation Time: %s, Modification Time: %s, Access Time: %s", c_time, m_time, a_time)
 
-        blob_data = sqlite3.Binary(file_data)
+            file_text = parsing.extract_text(file_data, ext)  # 파일 확장자 전달
+            
+            hash_value = parsing.calculate_hash(file_data)  
+            logging.info("Calculated hash: %s", hash_value)  # 계산된 해시 값 로깅
 
-        file_info_log = (os.path.join(relative_path, file_name), hash_value, m_time.strftime("%Y-%m-%d %H:%M:%S"), a_time.strftime("%Y-%m-%d %H:%M:%S"), c_time.strftime("%Y-%m-%d %H:%M:%S"))
-        file_info = (os.path.join(relative_path, file_name), hash_value, file_text, m_time.strftime("%Y-%m-%d %H:%M:%S"), a_time.strftime("%Y-%m-%d %H:%M:%S"), c_time.strftime("%Y-%m-%d %H:%M:%S"))
-        logging.info("File info before saving to DB: %s", str(file_info_log))  # file_info 변수의 일부 값을 로깅으로 확인
+            blob_data = sqlite3.Binary(file_data)
 
-        logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
-        parsing.save_metadata_and_blob_to_db(conn, file_info, blob_data)
-        logging.info("Data saved to DB: %s", file_info_log)  # DB에 데이터 저장 후 로깅
+            file_info_log = (os.path.join(relative_path, file_name), hash_value, m_time.strftime("%Y-%m-%d %H:%M:%S"), a_time.strftime("%Y-%m-%d %H:%M:%S"), c_time.strftime("%Y-%m-%d %H:%M:%S"))
+            file_info = (os.path.join(relative_path, file_name), hash_value, file_text, m_time.strftime("%Y-%m-%d %H:%M:%S"), a_time.strftime("%Y-%m-%d %H:%M:%S"), c_time.strftime("%Y-%m-%d %H:%M:%S"))
+            logging.info("File info before saving to DB: %s", str(file_info_log))  # file_info 변수의 일부 값을 로깅으로 확인
+
+            logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
+            parsing.save_metadata_and_blob_to_db(conn, file_info, blob_data)
+            logging.info("Data saved to DB: %s", file_info_log)  # DB에 데이터 저장 후 로깅
 
     except Exception as e:
         logging.exception("Exception occurred while processing the file: %s", file_name)
-
 
         
 # 파일 메타데이터 추출 함수

@@ -52,6 +52,7 @@ function PostList() {
 
   // 'path' 파라미터 값 복호화
   const db_path = decodeURIComponent(urlParams.get('path'));
+
   const [rows, setRows] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [inputValue, setInputValue] = useState("");
