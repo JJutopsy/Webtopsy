@@ -6,6 +6,8 @@ import threading
 import time
 from .db import init_casedb, init_tables_db
 from modules import e01_extractor, dd_extractor, zip_extractor, directory_extractor
+from modules.tag_extractor import KeywordExtractor
+from modules.ner_extractor import NERExtractor
 
 newcase_bp = Blueprint('newcase', __name__)
 
@@ -25,6 +27,8 @@ def new_case():
     caseinfo = data.get('caseinfo', '')  
     casedata = data['casedata']
     total = data['total']
+    nnp = data.get('nnp', False)
+    tag = data.get('tag', False)
 
     results = {
         "casename": casename,
@@ -81,7 +85,9 @@ def new_case():
         detail = process_item(item, parsingDBpath)
         results['details'].append(detail)
 
-    conn.close()  # 데이터베이스 연결 닫기
+    if nnp or tag:
+        update_tags_based_on_text(parsingDBpath, tag, nnp)
+    conn.close()
     return jsonify(results)
 
 
@@ -129,3 +135,42 @@ def process_item(item, parsingDBpath):
         logging.error(f"An error occurred while calling process_e01: {str(e)}")
         detail['status'], detail['message']= 500, str(e)
     return detail
+
+def update_tags_based_on_text(parsingDBpath, nnp, tag):
+    # 데이터베이스 연결을 한 번만 엽니다.
+    conn = sqlite3.connect(parsingDBpath)
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL;")
+    conn.commit()
+
+    # 인스턴스를 생성합니다.
+    keyword_extractor = KeywordExtractor(parsingDBpath)
+    ner_extractor = NERExtractor(parsingDBpath)
+
+    # 모든 파일에 대한 plain text 컬럼을 조회합니다.
+    cursor.execute("SELECT id, plain_text FROM files")
+    files = cursor.fetchall()
+
+    # 데이터베이스에 각각의 파일에 대해 업데이트를 수행합니다.
+    for file_id, plain_text in files:
+        try:
+            # NER 및 키워드 추출을 수행합니다.
+            extracted_nnp = ner_extractor.get_nnp(plain_text) if nnp else None  # process_texts 대신 get_nnp를 사용합니다.
+            extracted_tag = keyword_extractor.get_top_words(plain_text)
+
+            # 추출된 nnp와 tag 값을 데이터베이스에 업데이트합니다.
+            if extracted_nnp is not None or extracted_tag is not None:
+                cursor.execute(
+                    "UPDATE files SET nnp=?, tag=? WHERE id=?",
+                    (extracted_nnp, extracted_tag, file_id)
+                )
+        except sqlite3.OperationalError as e:
+            if str(e) == "database is locked":
+                # 예외가 발생한 경우 로그를 남기고, 필요에 따라 백오프를 적용할 수 있습니다.
+                print(f"Database is locked, retrying... (file_id={file_id})")
+                time.sleep(5)  # 5초간 대기 후 재시도
+                continue
+
+    # 변경 사항을 커밋하고 연결을 닫습니다.
+    conn.commit()
+    conn.close()

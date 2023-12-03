@@ -44,6 +44,9 @@ import { useRecoilState } from "recoil";
 import { LoginName } from "../atom/LoginName";
 
 function PostList() {
+
+
+
   // URL에서 쿼리 스트링 추출
   const queryString = window.location.search;
   const [User, setUser] = useRecoilState(LoginName);
