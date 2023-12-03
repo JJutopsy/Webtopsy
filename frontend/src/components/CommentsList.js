@@ -42,10 +42,7 @@ export default function CommentsList({ db_path }) {
         .catch((error) => console.error(error));
     };
     // 폴링 시작
-    const intervalId = setInterval(fetchComments, 100); // 5초마다 새로운 댓글 확인
 
-    // 컴포넌트가 언마운트될 때 폴링 중지
-    return () => clearInterval(intervalId);
   }, [db_path]);
 
   return (

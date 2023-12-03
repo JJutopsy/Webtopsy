@@ -28,26 +28,25 @@ import {
   Table,
   Tabs,
 } from "react-bootstrap";
-import SendIcon from "@mui/icons-material/Send";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  base16AteliersulphurpoolLight,
-  github,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
+
 import "bootstrap/dist/css/bootstrap.css";
 import Cookies from "js-cookie";
 import Comment from "./Comment";
 import SearchIcon from "@mui/icons-material/Search";
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CodeBlock from "./CodeBlock";
 import CommentsList from "./CommentsList";
 import Flag from "../pages/Flag";
 import DashTable from "./DashTable";
 import CodeWithComments from "./CodeWithComments";
+import { useRecoilState } from "recoil";
+import { LoginName } from "../atom/LoginName";
 
 function PostList() {
   // URL에서 쿼리 스트링 추출
   const queryString = window.location.search;
-
+  const [User, setUser] = useRecoilState(LoginName);
   // 쿼리 스트링 파싱
   const urlParams = new URLSearchParams(queryString);
 
@@ -180,8 +179,17 @@ function PostList() {
         >
           <Stack direction={"column"} spacing={1} width={"100%"}>
             <Stack direction="row" spacing={1} width={"100%"}>
-              <InputGroup className="mb-3">
-                
+              <InputGroup className="mb-3" style={{ height: '40px' }}>
+                <DropdownButton
+                  as={InputGroup.Prepend}
+                  variant="secondary"
+                  title={<AddCircleOutlineIcon />}
+                  id="input-group-dropdown-1"
+                >
+                  <Dropdown.Item href="#">사람 이름</Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item href="#">기관 이름</Dropdown.Item>
+                </DropdownButton>
                 <Form.Control
                   type="text"
                   placeholder="Keyword Search "
@@ -189,20 +197,17 @@ function PostList() {
                   onChange={handleInputValueChange}
                   onKeyPress={handleKeyPress}
                 />
-                <DropdownButton
-                  as={InputGroup.Prepend}
-                  variant="outline-secondary"
-                  title="옵션"
-                  id="input-group-dropdown-1"
-                >
-                  <Dropdown.Item href="#">사람 이름</Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item href="#">조직 이름</Dropdown.Item>
-                </DropdownButton>
                 <Button onClick={handleSearch}>
                   <SearchIcon /> 검색
                 </Button>
+
               </InputGroup>
+              <Button style={{ height: '40px' }}>
+                <CalendarMonthIcon />
+              </Button>
+              <Button style={{ height: '40px', width: '120px'}}  variant="danger">
+                쿼리 초기화
+              </Button>
             </Stack>
             {!keyword || rows.length == 0 ? (
               <div
@@ -248,7 +253,7 @@ function PostList() {
             )}
           </Stack>
         </Box>
-      <hr/>
+        <hr />
       </div>
       <Box
         sx={{
@@ -256,8 +261,8 @@ function PostList() {
           width: "100%"
         }}
       >
-        
-        <Box sx={{ flexGrow: 1, backgroundColor: "white" }} width={"15%"}>
+
+        {/* <Box sx={{ flexGrow: 1, backgroundColor: "white" }} width={"15%"}>
 
           <br />
           <Container component="main">
@@ -275,7 +280,7 @@ function PostList() {
 
             </Box>
           </Container>
-        </Box>
+        </Box> */}
 
         <Box width={selectedId ? "85%" : "70%"} sx={{ flexGrow: 1, paddingRight: "20px" }}>
 

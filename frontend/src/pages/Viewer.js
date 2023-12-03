@@ -22,12 +22,15 @@ export default function Viewer() {
           <Toolbar style={{ minHeight: '50px', display: 'flex', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex' }}>
               <Stack direction={'row'} spacing={1}>
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px',fontWeight: "bold"  }}>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px', fontWeight: "bold" }}>
                   Webtopsy
                 </Typography>
 
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px' }}>
                   |
+                </Typography>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px', fontWeight: "bold" }}>
+                  CASENAME
                 </Typography>
               </Stack>
             </div>
@@ -55,22 +58,24 @@ export default function Viewer() {
           style={{
             position: "sticky",
             top: 50,
-            backgroundColor:"white",
+            backgroundColor: "white",
             zIndex: 10
           }}
         >
-          <Tab eventKey="first" title="Search & Review" >
+          <Tab eventKey="first" title="Dashbaord" >
+            <br>
+            </br>
+            <h3>Dashboard</h3>
+          </Tab>
+          <Tab eventKey="second" title="Search & Review">
+
             <Box sx={{ backgroundColor: "#E9EDF5" }}>
               <PostList />
             </Box>
           </Tab>
-          <Tab eventKey="second" title="Email Aduit">
+          <Tab eventKey="third" title="Email Investigation">
             <br></br>
             <p>Email Aduit Page</p>
-          </Tab>
-          <Tab eventKey="third" title="DashBoard">
-            <br></br>
-            <p>Dashboard</p>
           </Tab>
         </Tabs>
       </div>
