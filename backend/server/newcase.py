@@ -2,13 +2,12 @@ from flask import Blueprint, request, jsonify
 import os
 import sqlite3
 import logging
-import time
 import threading
+import time
 from .db import init_casedb, init_tables_db
 from modules import e01_extractor, dd_extractor, zip_extractor, directory_extractor
 from modules.tag_extractor import KeywordExtractor
 from modules.ner_extractor import NERExtractor
-
 
 newcase_bp = Blueprint('newcase', __name__)
 
@@ -21,21 +20,6 @@ def get_db():
         _db_thread_local.conn = sqlite3.connect('casedb.sqlite')
     return _db_thread_local.conn, _db_thread_local.conn.cursor()
 
-def summarize_extensions(parsingDBpath):
-    conn = sqlite3.connect(parsingDBpath)
-    cursor = conn.cursor()
-    cursor.execute("SELECT file_path FROM files")  # 'files' 테이블의 'file_path' 컬럼에서 파일 경로를 조회합니다.
-    files = cursor.fetchall()
-    extension_count = {}
-    for file in files:
-        extension = os.path.splitext(file[0])[1].lower()
-        if extension in extension_count:
-            extension_count[extension] += 1
-        else:
-            extension_count[extension] = 1
-    conn.close()
-    return extension_count
-    
 @newcase_bp.route('/newcase', methods=['POST'])
 def new_case():
     data = request.json
@@ -45,6 +29,7 @@ def new_case():
     total = data['total']
     nnp = data.get('nnp', False)
     tag = data.get('tag', False)
+
     results = {
         "casename": casename,
         "caseinfo": caseinfo,
@@ -54,43 +39,44 @@ def new_case():
 
     conn, cursor = get_db()
 
-    # 기존 케이스 이름 검색
+    # 데이터베이스에서 같은 이름을 가진 케이스 검색
     cursor.execute('SELECT casename FROM cases WHERE casename LIKE ?', (casename + '%',))
-    existing_cases = [row[0] for row in cursor.fetchall()]
+    existing_cases = cursor.fetchall()
+    logging.info("Existing cases: %s", existing_cases)
 
-    new_casename = casename
-    suffix = 1
-    while True:
-        if new_casename in existing_cases:
-            new_casename = f"{casename}{suffix}"
-            suffix += 1
-        else:
-            case_folder_path = os.path.join('cases', new_casename).replace('\\', '/')
-            if not os.path.exists(case_folder_path):
-                os.makedirs(case_folder_path)
-                logging.info(f"Created case folder: {case_folder_path}")
-                break
-            else:
-                existing_cases.append(new_casename)
-                new_casename = f"{casename}{suffix}"
-                suffix += 1
+    # 같은 이름을 가진 케이스가 존재한다면, 새로운 이름 생성
+    if existing_cases:
+        existing_numbers = [int(name[0].replace(casename, "")) for name in existing_cases if name[0].replace(casename, "").isdigit()]
+        new_number = max(existing_numbers) + 1 if existing_numbers else 1
+        new_casename = casename + str(new_number)
+    else:
+        new_casename = casename
 
-    results['casename'] = new_casename
+    results['casename'] = new_casename  # 결과에 새로운 케이스 이름 업데이트
     logging.info("New casename: %s", new_casename)
+
+    # 케이스 폴더 생성
+    case_folder_path = os.path.join('cases', new_casename).replace('\\', '/')
+    if os.path.exists(case_folder_path):
+        conn.close()  # 데이터베이스 연결 닫기
+        return jsonify({"error": "Case folder already exists unexpectedly. Please try again."}), 500
+    os.makedirs(case_folder_path)
 
     # 파싱 데이터베이스 경로 설정
     parsingDBpath = os.path.join(case_folder_path, 'parsing.sqlite').replace('\\', '/')
     logging.info("parsingDBpath: %s", parsingDBpath)
-    # 파싱 데이터베이스에 TABLE 생성
-    init_tables_db(parsingDBpath)
-    
-    parsing_conn = sqlite3.connect(parsingDBpath)
-    parsing_cursor = parsing_conn.cursor()
 
+    # 데이터베이스 연결 및 커서 생성
+    parsing_conn = sqlite3.connect(parsingDBpath)
+    init_tables_db(parsingDBpath)
+
+    # 커밋 및 연결 닫기
     parsing_conn.commit()
     parsing_conn.close()
-    
-    cursor.execute('INSERT INTO cases (casename, caseinfo, parsingDBpath) VALUES (?, ?, ?)', (new_casename, caseinfo, parsingDBpath))
+
+    # 데이터베이스에 케이스 정보 및 파싱 데이터베이스 경로 저장
+    cursor.execute('INSERT INTO cases (casename, caseinfo, parsingDBpath) VALUES (?, ?, ?)',
+                   (new_casename, caseinfo, parsingDBpath))
     conn.commit()
     case_id = cursor.lastrowid
     logging.info("Case ID: %s", case_id)
@@ -138,6 +124,7 @@ def process_item(item, parsingDBpath):
                 result = zip_extractor.process_zip(item, parsingDBpath)
                 logging.info(f"Result from process_zip: {result}, Type: {type(result)}")
                 detail['status'], detail['message'] = result
+
             else:
                 # 지원하지 않는 파일 형식
                 detail['status'], detail['message'] = 400, "Unsupported file type"
@@ -145,7 +132,7 @@ def process_item(item, parsingDBpath):
             # 존재하지 않는 경로
             detail['status'], detail['message'] = 404, "Path does not exist"
     except Exception as e:
-        logging.error(f"An error occurred while calling process_item: {str(e)}")
+        logging.error(f"An error occurred while calling process_e01: {str(e)}")
         detail['status'], detail['message']= 500, str(e)
     return detail
 
