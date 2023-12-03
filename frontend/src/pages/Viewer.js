@@ -1,41 +1,84 @@
 import React, { useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
-import { Box, Typography } from "@mui/material";
-
+import { AppBar, Box, Button, Stack, Toolbar, Typography } from "@mui/material";
+import { Tab, Tabs } from 'react-bootstrap';
 import PostList from "../components/PostList";
 import CommentsList from "../components/CommentsList";
+import './Viewer.css'
+import IconButton from '@material-ui/core/IconButton';
+import SettingsIcon from '@material-ui/icons/Settings';
+import NotificationsIcon from '@material-ui/icons/Notifications';
+import HelpIcon from '@material-ui/icons/Help';
 
 export default function Viewer() {
-  const [keyword, setKeyword] = useState(""); // 키워드를 저장할 state
-  const [inputValue, setInputValue] = useState(""); // 임시로 Textarea의 값을 저장할 state
 
-  const handleInputValueChange = (e) => {
-    setInputValue(e.target.value);
-  };
-
-  const handleSearch = () => {
-    setKeyword(inputValue);
-    console.log(keyword);
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // Textarea에서 엔터를 쳤을 때 아래로 내려가는 것을 막음
-      handleSearch();
-    }
-  };
+  const [key, setKey] = useState('first');
 
   return (
     <>
-      <Box sx={{ display: "flex", backgroundColor: "#E9EDF5" }}>
-        <Box sx={{ flexGrow: 1 }} width={"100%"}>
-          {/* <SearchResult /> */}
-          <Container component="main" maxWidth="false">
-            <PostList />
-          </Container>
-        </Box>
-      </Box>
+      <div style={{ position: "sticky", top: 0, zIndex: 1 }}>
+        <AppBar position="sticky" style={{ height: '50px', backgroundColor: '#0d6efd', boxShadow: 'none' }}>
+          <Toolbar style={{ minHeight: '50px', display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex' }}>
+              <Stack direction={'row'} spacing={1}>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px', fontWeight: "bold" }}>
+                  Webtopsy
+                </Typography>
+
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px' }}>
+                  |
+                </Typography>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px', fontWeight: "bold" }}>
+                  CASENAME
+                </Typography>
+              </Stack>
+            </div>
+            <div>
+              <Stack direction={'row'} spacing={1}>
+                <Button color="inherit">TimeZone : KST (UTC+9)</Button>
+                <IconButton color="inherit">
+                  <SettingsIcon />
+                </IconButton>
+                <IconButton color="inherit">
+                  <NotificationsIcon />
+                </IconButton>
+                <IconButton color="inherit">
+                  <HelpIcon />
+                </IconButton>
+                <Button color="inherit">UserName</Button>
+              </Stack>
+            </div>
+          </Toolbar>
+        </AppBar>
+        <Tabs
+          id="controlled-tab-example"
+          activeKey={key}
+          onSelect={(k) => setKey(k)}
+          style={{
+            position: "sticky",
+            top: 50,
+            backgroundColor: "white",
+            zIndex: 10
+          }}
+        >
+          <Tab eventKey="first" title="Dashbaord" >
+            <br>
+            </br>
+            <h3>Dashboard</h3>
+          </Tab>
+          <Tab eventKey="second" title="Search & Review">
+
+            <Box sx={{ backgroundColor: "#E9EDF5" }}>
+              <PostList />
+            </Box>
+          </Tab>
+          <Tab eventKey="third" title="Email Investigation">
+            <br></br>
+            <p>Email Aduit Page</p>
+          </Tab>
+        </Tabs>
+      </div>
     </>
   );
 }

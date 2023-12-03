@@ -15,16 +15,20 @@ import { RecoilRoot } from "recoil";
 import JoinServer from "./pages/JoinServer";
 import StickyFooter from "./components/StickyFooter";
 import Cases from "./pages/Cases";
+import { useRecoilValue } from 'recoil';
 import Viewer from "./pages/Viewer";
+import { buttonState } from "./atom/ButtonState";
 const theme = createTheme({
   typography: {
     fontFamily: "Noto Sans KR, sans-serif",
   },
 });
 const App = () => {
+  const buttonStateValue = useRecoilValue(buttonState);
+
   return (
     <>
-      <RecoilRoot>
+
         <ThemeProvider theme={theme}>
           <Box
             sx={{
@@ -34,7 +38,7 @@ const App = () => {
             }}
           >
             <CssBaseline />
-            <Header style={{ position: "relative" }}></Header>
+            {!buttonStateValue && <Header style={{ position: "relative" }}></Header>}
 
             <Routes>
               <Route path="/" element={<Home />} />
@@ -47,7 +51,6 @@ const App = () => {
             </Routes>
           </Box>
         </ThemeProvider>
-      </RecoilRoot>
     </>
   );
 };
