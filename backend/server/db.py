@@ -63,6 +63,7 @@ def init_tables_db(db_path):
         CREATE TABLE IF NOT EXISTS files (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         file_path TEXT NOT NULL,
+        owner TEXT,
         hash_value TEXT NOT NULL,
         plain_text TEXT,
         m_time TEXT NOT NULL,

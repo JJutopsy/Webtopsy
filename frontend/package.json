@@ -5,6 +5,8 @@
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
     "@mui/icons-material": "^5.14.15",
     "@mui/joy": "^5.0.0-beta.14",
     "@mui/lab": "^5.0.0-alpha.152",
@@ -22,7 +24,10 @@
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.4",
     "react-chartjs-2": "^5.2.0",
+    "react-date-picker": "^10.5.2",
     "react-dom": "^18.2.0",
+    "react-icon": "^1.0.0",
+    "react-icons": "^4.12.0",
     "react-markdown": "^8.0.7",
     "react-router-dom": "^6.11.2",
     "react-scripts": "5.0.1",
@@ -56,6 +61,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "proxy": "http://192.168.1.2:5000"
+  }
 }

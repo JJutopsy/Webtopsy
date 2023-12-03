@@ -36,16 +36,13 @@ export default function CommentsList({ db_path }) {
           return response.json();
         })
         .then((data) => {
-          console.log(data); // 콘솔에 응답 출력
+        
           setComments(data); // 상태 업데이트
         })
         .catch((error) => console.error(error));
     };
     // 폴링 시작
-    const intervalId = setInterval(fetchComments, 100); // 5초마다 새로운 댓글 확인
 
-    // 컴포넌트가 언마운트될 때 폴링 중지
-    return () => clearInterval(intervalId);
   }, [db_path]);
 
   return (
