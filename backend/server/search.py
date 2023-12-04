@@ -2,6 +2,8 @@ from flask import Flask, Blueprint, request, jsonify
 import sqlite3
 import os
 import re
+import sys
+from dotenv import load_dotenv
 
 search_bp = Blueprint('search', __name__)
 
@@ -11,12 +13,14 @@ def highlight_keywords(text, keyword):
 
 @search_bp.route('/keyword', methods=['POST'])
 def search_keyword():
+    load_dotenv()
+
     data = request.get_json()
-    parsingDBpath = data.get('parsingDBpath')
+    parsingDBpath = os.environ.get("REACT_APP_HOME")+"/"+data.get('parsingDBpath')
+    print("!!",parsingDBpath)
     keyword = data.get('keyword')
 
     if not os.path.exists(parsingDBpath):
-        print("!")
         return '데이터베이스 파일을 찾을 수 없습니다.', 404
 
     conn = sqlite3.connect(parsingDBpath)
@@ -36,7 +40,7 @@ def search_keyword():
     result_list = []
     for row in results:
         highlighted_content = highlight_keywords(row['plain_text'], keyword)
-        result_list.append({'id': row['id'], 'file_path': row['file_path'], 'plain_text': row['plain_text']})
+        result_list.append({'id': row['id'], 'file_path': row['file_path'], 'plain_text': row['plain_text'], 'tag':row['tag']})
 
     return jsonify(result_list)
 

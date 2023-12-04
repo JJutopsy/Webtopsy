@@ -1,0 +1,11 @@
+.nav-tabs .nav-link {
+    border: none !important;
+  }
+  
+  .nav-tabs .nav-item.show .nav-link,
+  .nav-tabs .nav-link.active {
+    border: none !important;
+    border-bottom: 5px solid #0d6efd !important;
+    padding-bottom: 10px;
+    border-radius: 0;
+  }
