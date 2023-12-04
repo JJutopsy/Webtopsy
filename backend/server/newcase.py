@@ -5,7 +5,7 @@ import logging
 import threading
 import time
 from .db import init_casedb, init_tables_db
-from modules import e01_extractor, dd_extractor, zip_extractor, directory_extractor
+from modules import e01_extractor, dd_extractor, zip_extractor, directory_extractor, xml_extractor
 from modules.tag_extractor import KeywordExtractor
 from modules.ner_extractor import NERExtractor
 
@@ -83,6 +83,7 @@ def new_case():
 
     for item in casedata:
         detail = process_item(item, parsingDBpath)
+        xml_extractor.process_files(parsingDBpath)
         results['details'].append(detail)
 
     if nnp or tag:
