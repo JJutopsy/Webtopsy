@@ -133,6 +133,14 @@ def init_tables_db(db_path):
     )
     ''')
     cursor.execute("""
+            CREATE TABLE IF NOT EXISTS documentmetadata (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                DocumentID INTEGER,
+                filename TEXT
+                FOREIGN KEY(DocumentID) REFERENCES DocumentMetadata(ID)
+            );
+        """)
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS MediaFiles (
         ID INTEGER PRIMARY KEY AUTOINCREMENT,
         DocumentID INTEGER,
@@ -144,11 +152,6 @@ def init_tables_db(db_path):
         FOREIGN KEY(DocumentID) REFERENCES DocumentMetadata(ID)
     )
     """)
-    cursor.execute("""
-            CREATE TABLE IF NOT EXISTS documentmetadata (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                filename TEXT
-            );
-        """)
+    
     conn.commit()
     conn.close()
