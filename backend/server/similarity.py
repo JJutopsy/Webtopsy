@@ -230,17 +230,13 @@ def calculate_metadata_matching_ratio(db_path, key_file_id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    # keyfile의 파일 경로를 가져옴
-    cursor.execute("SELECT file_path FROM files WHERE id = ?", (key_file_id,))
-    keyfile_path = cursor.fetchone()[0]
-    keyfile_name = os.path.basename(keyfile_path)
 
     # keyfile의 지정된 컬럼들에 대한 메타데이터를 가져옴
-    cursor.execute("SELECT creator, created, AppVersion, Application, Company, Template FROM documentmetadata WHERE filename = ?", (keyfile_name,))
+    cursor.execute("SELECT creator, created, AppVersion, Application, Company, Template FROM documentmetadata WHERE file_id = ?", (key_file_id,))
     keyfile_metadata = cursor.fetchone()
 
     # keyfile이 아닌 다른 모든 파일들의 지정된 컬럼들에 대한 메타데이터를 가져옴
-    cursor.execute("SELECT id, creator, created, AppVersion, Application, Company, Template FROM documentmetadata WHERE filename != ?", (keyfile_name,))
+    cursor.execute("SELECT id, creator, created, AppVersion, Application, Company, Template FROM documentmetadata WHERE file_id != ?", (key_file_id,))
     other_files_metadata = cursor.fetchall()
 
     # 일치 비율을 계산함
@@ -257,15 +253,9 @@ def calculate_media_match_rate(db_path, key_file_id):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
-    # 'files' 테이블에서 키 파일 ID에 해당하는 레코드의 파일 경로 가져오기
-    c.execute(f"SELECT file_path FROM files WHERE id={key_file_id}")
-    key_file_path = c.fetchone()[0]
-
-    # 파일 경로에서 파일명 추출
-    key_file_name = os.path.basename(key_file_path)
 
     # 'MediaFiles' 테이블에서 'SourceFileName'이 파일명과 일치하는 레코드의 해시 값 가져오기
-    c.execute(f"SELECT SHA256Hash FROM MediaFiles WHERE SourceFileName='{key_file_name}'")
+    c.execute(f"SELECT SHA256Hash FROM MediaFiles WHERE DocumentID='{key_file_id}'")
     key_file_hashes = [row[0] for row in c.fetchall()]
 
     # 키 파일을 제외한 각 파일에 대해 일치율 계산
@@ -275,7 +265,7 @@ def calculate_media_match_rate(db_path, key_file_id):
     media_match_rates = []
     for file_id, file_path in other_files:
         file_name = os.path.basename(file_path)
-        c.execute(f"SELECT SHA256Hash FROM MediaFiles WHERE SourceFileName='{file_name}'")
+        c.execute(f"SELECT SHA256Hash FROM MediaFiles WHERE DocumentID='{key_file_id}'")
         other_file_hashes = [row[0] for row in c.fetchall()]
 
         # 일치하는 해시 값의 개수 계산
