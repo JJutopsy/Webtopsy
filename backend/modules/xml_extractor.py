@@ -7,8 +7,6 @@ from hashlib import sha256
 import zipfile
 import io
 
-
-
 # OOXML 파일이 맞는지 확인하는 함수
 def is_ooxml(filename):
     ooxml_extensions = ['.docx', '.xlsx', '.pptx']
@@ -89,19 +87,6 @@ def process_files(db_path):
     with sqlite3.connect(db_path) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS MediaFiles (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                DocumentID INTEGER,
-                OriginalFileName TEXT,
-                SourceFileName TEXT,
-                SHA256Hash TEXT,
-                FileSize INTEGER,
-                FileData BLOB
-            )
-        """)
-        conn.commit()
         skipped_files = []
 
         cursor.execute("SELECT id, file_path, blob_data FROM files")
