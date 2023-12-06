@@ -9,7 +9,7 @@ from .docx_extractor import DOCXExtractor
 from .pptx_extractor import PPTXExtractor
 from .xlsx_extractor import XLSXExtractor
 from .pdf_extractor import PDFExtractor
-import io
+from dateutil import parser as date_parser
 
 class EmlParser:
     def __init__(self, eml_data):
@@ -92,6 +92,8 @@ class EmlParser:
     def process_eml(self):
         self.parse_eml_data()
         ctime, mtime, atime = self.parse_eml_dates()
+
+        # Subject 처리
         if self.msg['Subject']:
             subject = decode_header(self.msg['Subject'])[0][0]
             if isinstance(subject, bytes):
@@ -99,49 +101,51 @@ class EmlParser:
                     subject = subject.decode('utf-8')
                 except UnicodeDecodeError:
                     subject = subject.decode('euc-kr', errors='ignore')
-
         else:
             subject = '제목 없음'
-        date_str = self.msg['Date']
-        date = datetime.datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %z')
-        formatted_date = date.strftime('%Y-%m-%d %H:%M:%S')
 
-        # 'From' 필드 처리
+        # Date 처리
+        date_str = self.msg.get('Date', '')
+        formatted_date = '날짜 없음'  # 기본값 설정
+        if date_str:
+            try:
+                # 타임존 정보 제거 후 날짜 파싱 시도
+                date_str = re.sub(r'\([^)]*\)', '', date_str).strip()
+                date = date_parser.parse(date_str)
+                formatted_date = date.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception as e:
+                print(f"날짜 파싱 오류 (스킵됨): {e}")
+                return None  # 파싱 오류 발생 시, 이 이메일은 처리하지 않음
+
+        # From 처리
         from_ = decode_header(self.msg['From'])[0][0]
         if isinstance(from_, bytes):
             try:
                 from_ = from_.decode('utf-8')
             except UnicodeDecodeError:
                 from_ = from_.decode('euc-kr', errors='ignore')
-
-            
-
-        # ';'를 ','로 바꾸기
         from_ = from_.replace(';', ',')
-
-        # 'From' 필드에서 원치 않는 문자 제거 (영문, 숫자, '@', '.', ',', '_', 한글 허용)
         from_ = re.sub(r'[^A-Za-z0-9@.,_가-힣]', '', from_)
 
-        # 'To' 필드 처리
+        # To 처리
         to = decode_header(self.msg['To'])[0][0]
         if isinstance(to, bytes):
-            #to = to.decode('utf-8', errors='ignore')
             try:
                 to = to.decode('utf-8')
             except UnicodeDecodeError:
                 to = to.decode('euc-kr', errors='ignore')
         to = to.replace('<', '').replace('>', '').strip()
-
-        # ';'를 ','로 바꾸기
         to = to.replace(';', ',')
-
-        # 'To' 필드에서 원치 않는 문자 제거 (영문, 숫자, '@', '.', ',', '_', 한글 허용)
         to = re.sub(r'[^A-Za-z0-9@.,_가-힣]', '', to)
 
+        # 메일 본문 추출
         mail_body = self.extract_body()
+
+        # 해시 계산
         hash_value = self.calculate_hash(mail_body.encode())
 
         return subject, formatted_date, from_, to, ctime, mtime, atime, hash_value, mail_body
+
 
 '''
 if __name__ == "__main__":
