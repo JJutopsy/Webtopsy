@@ -230,15 +230,35 @@ def calculate_metadata_matching_ratio(db_path, key_file_id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
+    # keyfile의 파일 경로를 가져옴
+    cursor.execute("SELECT file_path FROM files WHERE id = ?", (key_file_id,))
+    keyfile_path = cursor.fetchone()[0]
+    keyfile_name = os.path.basename(keyfile_path)
 
     # keyfile의 지정된 컬럼들에 대한 메타데이터를 가져옴
-    cursor.execute("SELECT creator, created, AppVersion, Application, Company, Template FROM documentmetadata WHERE file_id = ?", (key_file_id,))
-    keyfile_metadata = cursor.fetchone()
+    columns = ["creator", "created", "AppVersion", "Application", "Company", "Template"]
+    keyfile_metadata = []
+    for column in columns:
+        try:
+            cursor.execute(f"SELECT {column} FROM documentmetadata WHERE filename = ?", (keyfile_name,))
+            keyfile_metadata.append(cursor.fetchone()[0])
+        except sqlite3.OperationalError:
+            keyfile_metadata.append(None)
 
     # keyfile이 아닌 다른 모든 파일들의 지정된 컬럼들에 대한 메타데이터를 가져옴
-    cursor.execute("SELECT id, creator, created, AppVersion, Application, Company, Template FROM documentmetadata WHERE file_id != ?", (key_file_id,))
-    other_files_metadata = cursor.fetchall()
-
+    other_files_metadata = []
+    cursor.execute("SELECT id FROM documentmetadata WHERE filename != ?", (keyfile_name,))
+    other_files_ids = cursor.fetchall()
+    for file_id_tuple in other_files_ids:
+        file_id = file_id_tuple[0]  # file_id를 튜플에서 추출
+        file_metadata = [file_id]
+        for column in columns:
+            try:
+                cursor.execute(f"SELECT {column} FROM documentmetadata WHERE id = ?", (file_id,))  # file_id를 직접 사용
+                file_metadata.append(cursor.fetchone()[0])
+            except sqlite3.OperationalError:
+                file_metadata.append(None)
+        other_files_metadata.append(tuple(file_metadata))
     # 일치 비율을 계산함
     matching_ratios = []
     for metadata in other_files_metadata:
