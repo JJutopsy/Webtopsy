@@ -17,11 +17,25 @@ def similarity_analysis():
     key_document_id = data['key_document_id']
 
     with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, file_path FROM files WHERE id=?", (key_document_id,))
+        rows = cursor.fetchall()
+        
+        # 키파일 ID가 files 테이블에 없으면 함수를 종료
+        if not rows:
+            return jsonify({"message": "key_document_id가 files 테이블에 존재하지 않습니다."})
+        
+        # 파일 경로의 마지막 부분이 ooxml 파일 확장자가 아니면 함수를 종료
+        _, file_path = rows[0]
+        if not file_path.lower().endswith(('.docx', '.xlsx', '.pptx')):
+            return jsonify({"message": "지정된 파일은 ooxml 구조의 확장자를 가지고 있지 않습니다."})
+
         # 메타데이터 처리 및 해시 계산
         process_files(conn)
+        
         # 유사한 미디어 파일이 포함된 문서 찾기
         similar_media = find_similar_media(conn, key_document_id)
-        
+
         # 완전히 동일한 문서 찾기
         identical_documents = find_identical_documents(conn, key_document_id)
 
