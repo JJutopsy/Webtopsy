@@ -3,9 +3,7 @@ from transformers import BertTokenizer
 import torch
 from transformers import BertConfig
 from transformers import BertForTokenClassification
-import json
 import sqlite3
-import time
 import re
 import string
 from dotenv import load_dotenv

@@ -3,16 +3,14 @@ from transformers import BertTokenizer
 import torch
 from transformers import BertConfig
 from transformers import BertForTokenClassification
-import json
 import sqlite3
-import time
 import re
 import string
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
-class NERExtractor:
+class NNPExtractor:
     def __init__(self, db_name):
         # Database connection
         self.conn = sqlite3.connect(db_name)

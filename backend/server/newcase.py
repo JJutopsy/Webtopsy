@@ -8,6 +8,8 @@ from .db import init_casedb, init_tables_db
 from modules import e01_extractor, dd_extractor, zip_extractor, directory_extractor, xml_extractor
 from modules.tag_extractor import KeywordExtractor
 from modules.ner_extractor import NERExtractor
+from modules.nnp_extractor import NNPExtractor
+from modules.emlperson_extractor import EmlPersonUpdater
 
 newcase_bp = Blueprint('newcase', __name__)
 
@@ -86,8 +88,37 @@ def new_case():
         xml_extractor.process_files(parsingDBpath)
         results['details'].append(detail)
 
+    # files 테이블에 대한 NNP와 태그 데이터 업데이트
     if nnp or tag:
-        update_tags_based_on_text(parsingDBpath, tag, nnp)
+        update_tags_based_on_text(parsingDBpath, nnp, tag)
+
+    # NNP 처리
+    if nnp:
+        try:
+            nnp_extractor = NNPExtractor(parsingDBpath)
+            nnp_extractor.process_texts_eml()
+            nnp_extractor.process_texts_emlAttachments()
+            nnp_extractor.process_texts_pstAttachments()
+        except Exception as e:
+            logging.error(f"Error processing NNP for emlEmails: {e}")
+
+    # 태그 처리
+    if tag:
+        try:
+            tag_extractor = KeywordExtractor(parsingDBpath)
+            tag_extractor.extract_keywords_eml()
+            tag_extractor.extract_keywords_emlAttachments()
+            tag_extractor.extract_keywords_pstAttachments()
+        except Exception as e:
+            logging.error(f"Error processing TAG for emlEmails: {e}")
+
+    # EmlPerson 업데이트
+    try:
+        eml_person_updater = EmlPersonUpdater(parsingDBpath)
+        eml_person_updater.update_eml_person_table()
+    except Exception as e:
+        logging.error(f"Error updating EmlPerson table: {e}")
+
     conn.close()
     return jsonify(results)
 
