@@ -27,9 +27,9 @@ def parse_metadata(blob_data, xml_file):
         return {}
 
 # 데이터베이스에 메타데이터를 저장하는 함수
-def save_metadata(conn, filename, metadata):
+def save_metadata(conn, file_id, filename, metadata):
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS documentmetadata (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT);")
+    cursor.execute("CREATE TABLE IF NOT EXISTS documentmetadata (id INTEGER PRIMARY KEY AUTOINCREMENT, file_id INTEGER, filename TEXT);")
     conn.commit()
 
     cursor.execute("PRAGMA table_info(documentmetadata);")
@@ -46,8 +46,8 @@ def save_metadata(conn, filename, metadata):
     if row is None:
         columns = '", "'.join(metadata.keys())
         placeholders = ', '.join('?' * len(metadata))
-        sql = f'INSERT INTO documentmetadata ("filename", "{columns}") VALUES (?, {placeholders})'
-        values = [filename] + list(metadata.values())
+        sql = f'INSERT INTO documentmetadata ("file_id", "filename", "{columns}") VALUES (?, ?, {placeholders})'
+        values = [file_id, filename] + list(metadata.values())
         cursor.execute(sql, values)
         conn.commit()
     else:
@@ -99,7 +99,7 @@ def process_files(db_path):
             if is_ooxml(file_path):
                 for xml_file in ['docProps/app.xml', 'docProps/core.xml']:
                     metadata = parse_metadata(blob_data, xml_file)
-                    save_metadata(conn, os.path.basename(file_path), metadata)
+                    save_metadata(conn, document_id, os.path.basename(file_path), metadata)
                 extract_media_from_blob(document_id, blob_data, source_file_name, cursor, skipped_files)
 
     return skipped_files

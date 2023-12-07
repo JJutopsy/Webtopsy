@@ -4,6 +4,8 @@ import os
 from io import BytesIO
 from zipfile import ZipFile
 import xml.etree.ElementTree as ET
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 similarity_bp = Blueprint('similarity', __name__)
@@ -15,21 +17,35 @@ def similarity_analysis():
     key_document_id = data['key_document_id']
 
     with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, file_path FROM files WHERE id=?", (key_document_id,))
+        rows = cursor.fetchall()
+        
+        # 키파일 ID가 files 테이블에 없으면 함수를 종료
+        if not rows:
+            return jsonify({"message": "key_document_id가 files 테이블에 존재하지 않습니다."})
+        
+        # 파일 경로의 마지막 부분이 ooxml 파일 확장자가 아니면 함수를 종료
+        _, file_path = rows[0]
+        if not file_path.lower().endswith(('.docx', '.xlsx', '.pptx')):
+            return jsonify({"message": "지정된 파일은 ooxml 구조의 확장자를 가지고 있지 않습니다."})
+
         # 메타데이터 처리 및 해시 계산
         process_files(conn)
+        
         # 유사한 미디어 파일이 포함된 문서 찾기
         similar_media = find_similar_media(conn, key_document_id)
-        
+
         # 완전히 동일한 문서 찾기
         identical_documents = find_identical_documents(conn, key_document_id)
 
-        # 메타데이터가 유사한 문서 찾기 (구현 필요)
-        #similar_metadata_docs = find_similar_metadata_documents(conn, key_document_id)
+        # 여러요소(평문,태그,미디어,메타데이터)가 유사한 문서 찾기 
+        final_similar_metadata_docs = calculate_final_similarity(conn, key_document_id)
 
     result = {
         "identical_documents": identical_documents,
         "similar_media": similar_media,
-        #"similar_metadata_documents": similar_metadata_docs
+        "final_similar_metadata_documents": final_similar_metadata_docs
     }
 
     return jsonify(result)
@@ -156,3 +172,146 @@ def find_identical_documents(conn, key_document_id):
         identical_documents.append({'id': file_id, 'file_path': file_path})
 
     return identical_documents
+
+
+
+def calculate_cosine_similarity(db_path, key_file_id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # keyfile의 plain_text 가져오기
+    cursor.execute("SELECT plain_text FROM files WHERE id = ?", (key_file_id,))
+    keyfile_text = cursor.fetchone()[0]
+
+    # 다른 파일들의 plain_text 가져오기
+    cursor.execute("SELECT id, plain_text FROM files WHERE id != ?", (key_file_id,))
+    other_files = cursor.fetchall()
+
+    other_files_text = [row[1] for row in other_files]
+
+    # 텍스트를 벡터화
+    vectorizer = TfidfVectorizer()
+    vectors = vectorizer.fit_transform([keyfile_text] + other_files_text)
+
+    # 코사인 유사도 계산
+    cosine_similarities = cosine_similarity(vectors[0:1], vectors[1:]).flatten()
+
+    # 결과에 대한 파일 ID와 유사도를 리스트 형태로 반환
+    result = [(file[0], similarity) for file, similarity in zip(other_files, cosine_similarities)]
+
+    return result
+
+
+
+def calculate_tag_matching_ratio(db_path, key_file_id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # 키 파일의 태그 가져오기
+    cursor.execute("SELECT tag FROM files WHERE id = ?", (key_file_id,))
+    keyfile_tags = cursor.fetchone()[0].split(',')
+
+    # 다른 파일들의 태그와 ID 가져오기
+    cursor.execute("SELECT id, tag FROM files WHERE id != ?", (key_file_id,))
+    other_files_tags = cursor.fetchall()
+
+    # 일치율 계산
+    matching_ratios = []
+    for file_id, tags in other_files_tags:
+        matching_count = sum([1 for tag in tags.split(',') if tag in keyfile_tags])
+        matching_ratio = (matching_count / len(keyfile_tags)) * 100
+        matching_ratios.append((file_id, matching_ratio))
+
+    return matching_ratios
+
+
+
+def calculate_metadata_matching_ratio(db_path, key_file_id):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # keyfile의 파일 경로를 가져옴
+    cursor.execute("SELECT file_path FROM files WHERE id = ?", (key_file_id,))
+    keyfile_path = cursor.fetchone()[0]
+    keyfile_name = os.path.basename(keyfile_path)
+
+    # keyfile의 지정된 컬럼들에 대한 메타데이터를 가져옴
+    columns = ["creator", "created", "AppVersion", "Application", "Company", "Template"]
+    keyfile_metadata = []
+    for column in columns:
+        try:
+            cursor.execute(f"SELECT {column} FROM documentmetadata WHERE filename = ?", (keyfile_name,))
+            keyfile_metadata.append(cursor.fetchone()[0])
+        except sqlite3.OperationalError:
+            keyfile_metadata.append(None)
+
+    # keyfile이 아닌 다른 모든 파일들의 지정된 컬럼들에 대한 메타데이터를 가져옴
+    other_files_metadata = []
+    cursor.execute("SELECT id FROM documentmetadata WHERE filename != ?", (keyfile_name,))
+    other_files_ids = cursor.fetchall()
+    for file_id_tuple in other_files_ids:
+        file_id = file_id_tuple[0]  # file_id를 튜플에서 추출
+        file_metadata = [file_id]
+        for column in columns:
+            try:
+                cursor.execute(f"SELECT {column} FROM documentmetadata WHERE id = ?", (file_id,))  # file_id를 직접 사용
+                file_metadata.append(cursor.fetchone()[0])
+            except sqlite3.OperationalError:
+                file_metadata.append(None)
+        other_files_metadata.append(tuple(file_metadata))
+    # 일치 비율을 계산함
+    matching_ratios = []
+    for metadata in other_files_metadata:
+        matching_count = sum([1 for key_meta, other_meta in zip(keyfile_metadata, metadata[1:]) if key_meta == other_meta and key_meta is not None])
+        matching_ratios.append((metadata[0], (matching_count / len(keyfile_metadata)) * 100))  # 일치 비율을 백분율로 표현
+
+    return matching_ratios
+
+
+def calculate_media_match_rate(db_path, key_file_id):
+    # SQLite 데이터베이스 연결
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+
+
+    # 'MediaFiles' 테이블에서 'SourceFileName'이 파일명과 일치하는 레코드의 해시 값 가져오기
+    c.execute(f"SELECT SHA256Hash FROM MediaFiles WHERE DocumentID='{key_file_id}'")
+    key_file_hashes = [row[0] for row in c.fetchall()]
+
+    # 키 파일을 제외한 각 파일에 대해 일치율 계산
+    c.execute(f"SELECT DISTINCT id, file_path FROM files WHERE id<>{key_file_id}")
+    other_files = c.fetchall()
+
+    media_match_rates = []
+    for file_id, file_path in other_files:
+        file_name = os.path.basename(file_path)
+        c.execute(f"SELECT SHA256Hash FROM MediaFiles WHERE DocumentID='{key_file_id}'")
+        other_file_hashes = [row[0] for row in c.fetchall()]
+
+        # 일치하는 해시 값의 개수 계산
+        matching_hashes = set(key_file_hashes) & set(other_file_hashes)
+        match_rate = len(matching_hashes) / len(key_file_hashes) * 100
+
+        media_match_rates.append((file_id, match_rate))
+
+    return media_match_rates
+
+def calculate_final_similarity(db_path, key_file_id):
+    # 파일별 일치율을 담을 딕셔너리를 초기화합니다.
+    final_ratios = {}
+
+    # 모든 일치율 리스트를 순회합니다.
+    for ratios in [calculate_cosine_similarity(db_path, key_file_id), calculate_tag_matching_ratio(db_path, key_file_id),
+                    calculate_metadata_matching_ratio(db_path, key_file_id), calculate_media_match_rate(db_path, key_file_id)]:
+        for file_id, ratio in ratios:
+            # 파일별 일치율을 동일한 비율로 합칩니다.
+            if file_id in final_ratios:
+                final_ratios[file_id] += ratio
+            else:
+                final_ratios[file_id] = ratio
+
+    # 파일별 일치율의 평균을 계산합니다.
+    for file_id in final_ratios:
+        final_ratios[file_id] /= 4
+
+    return final_ratios
