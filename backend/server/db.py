@@ -132,6 +132,7 @@ def init_tables_db(db_path):
         relatedPerson TEXT
     )
     ''')
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS MediaFiles (
         ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -145,10 +146,13 @@ def init_tables_db(db_path):
     )
     """)
     cursor.execute("""
-            CREATE TABLE IF NOT EXISTS documentmetadata (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                filename TEXT
-            );
-        """)
+        CREATE TABLE IF NOT EXISTS documentmetadata (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        file_id INTEGER,
+        filename TEXT
+    )
+    """)
+    
+    
     conn.commit()
     conn.close()

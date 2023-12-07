@@ -110,7 +110,7 @@ export default function Cases() {
 
   useEffect(() => {
     fetchCases().then((data) => setCases(data));
-  }, [cases]);
+  }, []);
 
   return (
     <>
