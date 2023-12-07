@@ -16,7 +16,7 @@ from .emlperson import emailperson_bp
 from .tag import tag_bp
 from .nnp import nnp_bp
 
-from .xml import xml_bp
+# from .xml import xml_bp
 from .dashboard import dashboard_bp
 
 def create_app():
@@ -37,7 +37,7 @@ def create_app():
     app.register_blueprint(emailperson_bp)
     app.register_blueprint(tag_bp)
     app.register_blueprint(nnp_bp)
-    app.register_blueprint(xml_bp)
+    # app.register_blueprint(xml_bp)
     app.register_blueprint(dashboard_bp)
 #    app.register_blueprint(calendar_bp)
 
