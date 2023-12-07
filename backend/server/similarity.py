@@ -1,9 +1,6 @@
-from flask import Flask, request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint
 import sqlite3
-import os
-from io import BytesIO
-from zipfile import ZipFile
-import xml.etree.ElementTree as ET
+from modules import total_similar
 
 
 similarity_bp = Blueprint('similarity', __name__)
@@ -22,13 +19,13 @@ def similarity_analysis():
         # 완전히 동일한 문서 찾기
         identical_documents = find_identical_documents(conn, key_document_id)
 
-        # 메타데이터가 유사한 문서 찾기 (구현 필요)
-        #similar_metadata_docs = find_similar_metadata_documents(conn, key_document_id)
-
+        # 여러요소가 일치하는지 종합적인 문서 찾기 (평문,태그,메타데이터,미디어파일 해쉬값)
+        
+    similar_information_docs = total_similar.calculate_final_similarity(db_path, key_document_id)
     result = {
         "identical_documents": identical_documents,
         "similar_media": similar_media,
-        #"similar_metadata_documents": similar_metadata_docs
+        "similar_information_docs": similar_information_docs
     }
 
     return jsonify(result)
@@ -38,9 +35,9 @@ def find_similar_media(conn, key_document_id):
     cursor = conn.cursor()
 
     # key_document_id에 해당하는 미디어 파일의 해시값과 총 개수를 가져옵니다.
-    cursor.execute("SELECT SHA256Hash FROM MediaFiles WHERE DocumentID = ?", (key_document_id,))
+    cursor.execute("SELECT SHA256Hash FROM MediaFiles WHERE DocumentID = ?", (key_document_id))
     key_files_hashes = {row['SHA256Hash'] for row in cursor.fetchall()}
-    cursor.execute("SELECT COUNT(*) FROM MediaFiles WHERE DocumentID = ?", (key_document_id,))
+    cursor.execute("SELECT COUNT(*) FROM MediaFiles WHERE DocumentID = ?", (key_document_id))
     key_media_count = cursor.fetchone()[0]
 
     # 모든 문서의 미디어 파일 수를 계산합니다.
@@ -74,6 +71,7 @@ def find_similar_media(conn, key_document_id):
         })
 
     return result
+    
 # 완전히 동일한 해시값을 가져와서 문서를 찾는 함수
 def find_identical_documents(conn, key_document_id):
     identical_documents = []
