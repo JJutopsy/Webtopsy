@@ -38,7 +38,12 @@ def calculate_tag_matching_ratio(db_path, key_file_id):
 
     # 키 파일의 태그 가져오기
     cursor.execute("SELECT tag FROM files WHERE id = ?", (key_file_id,))
-    keyfile_tags = cursor.fetchone()[0].split(',')
+    keyfile_tags_row = cursor.fetchone()
+
+    if keyfile_tags_row is None or keyfile_tags_row[0] is None:
+        keyfile_tags = set()
+    else:
+        keyfile_tags = set(keyfile_tags_row[0].split(','))
 
     # 다른 파일들의 태그와 ID 가져오기
     cursor.execute("SELECT id, tag FROM files WHERE id != ?", (key_file_id,))
@@ -47,11 +52,21 @@ def calculate_tag_matching_ratio(db_path, key_file_id):
     # 일치율 계산
     matching_ratios = []
     for file_id, tags in other_files_tags:
-        matching_count = sum([1 for tag in tags.split(',') if tag in keyfile_tags])
-        matching_ratio = (matching_count / len(keyfile_tags)) * 100
+        if tags is None:
+            tags = ''
+        tags_set = set(tags.split(','))
+        matching_count = len(tags_set & keyfile_tags)
+        total_tags = len(keyfile_tags)
+
+        if total_tags > 0:
+            matching_ratio = (matching_count / total_tags) * 100
+        else:
+            matching_ratio = 0
+
         matching_ratios.append((file_id, matching_ratio))
 
     return matching_ratios
+
 
 
 
@@ -148,7 +163,8 @@ def calculate_final_similarity(db_path, key_file_id):
             else:
                 # 파일 ID에 해당하는 파일명을 찾습니다.
                 cursor.execute("SELECT filename FROM documentmetadata WHERE file_id=?", (file_id,))
-                filename = cursor.fetchone()[0]
+                row = cursor.fetchone()
+                filename = row[0] if row else "Unknown File"  # 결과가 없는 경우 "Unknown File"로 설정
 
                 temp_ratios[file_id] = {'file_id': file_id, 'filename': filename, 'ratio': ratio * ratio_weight}
 
