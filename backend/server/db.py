@@ -136,6 +136,7 @@ def init_tables_db(db_path):
         reCount INTEGER
     )
     ''')
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS MediaFiles (
         ID INTEGER PRIMARY KEY AUTOINCREMENT,

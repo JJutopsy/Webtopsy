@@ -3,7 +3,9 @@
 * {
   animation: main 0.5s cubic-bezier(0, 0, 0, 1) forwards;
 }
-
+body{
+  font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif !important;
+}
 #title {
   text-shadow: 0.125em 0 0 #0c134f;
   text-shadow: 0em 0.125em 0 #8294c4;

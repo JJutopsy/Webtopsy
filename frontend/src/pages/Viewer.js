@@ -10,6 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import SettingsIcon from '@material-ui/icons/Settings';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import HelpIcon from '@material-ui/icons/Help';
+import Dashboard from "./Dashboard";
 
 export default function Viewer() {
 
@@ -63,9 +64,9 @@ export default function Viewer() {
           }}
         >
           <Tab eventKey="first" title="Dashbaord" >
-            <br>
-            </br>
-            <h3>Dashboard</h3>
+            <Box sx={{ backgroundColor: "#E9EDF5"}} >
+              <Dashboard />
+            </Box>
           </Tab>
           <Tab eventKey="second" title="Search & Review">
 
