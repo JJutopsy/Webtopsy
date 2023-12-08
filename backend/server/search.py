@@ -17,7 +17,6 @@ def search_keyword():
 
     data = request.get_json()
     parsingDBpath = os.environ.get("REACT_APP_HOME")+"/"+data.get('parsingDBpath')
-    print("!!",parsingDBpath)
     keyword = data.get('keyword')
 
     if not os.path.exists(parsingDBpath):
@@ -29,24 +28,16 @@ def search_keyword():
 
     query = "SELECT * FROM files WHERE file_path LIKE ? OR plain_text LIKE ?"
     results = cursor.execute(query, ('%' + keyword + '%', '%' + keyword + '%')).fetchall()
-    print("이것은 리절트 값입니다:", results)
 
     conn.close()
 
     if not results:
-        print("이것은 리절트 값입니다:", results)
+ 
         return '검색 결과가 없습니다.', 404
 
     result_list = []
     for row in results:
-        highlighted_content = highlight_keywords(row['plain_text'], keyword)
-        result_list.append({'id': row['id'], 'file_path': row['file_path'], 'plain_text': row['plain_text'], 'tag':row['tag']})
-
-    return jsonify(result_list)
-
-    result_list = []
-    for row in results:
-        highlighted_content = highlight_keywords(row['content'], keyword)
-        result_list.append({'id': row['id'], 'name': row['name'], 'content': highlighted_content})
+        if row['tag'] and row['NNP']:
+            result_list.append({'id': row['id'], 'file_path': row['file_path'], 'plain_text': row['plain_text'], 'tag':row['tag'], 'NNP':row['NNP'], 'm_time':row['m_time'],'a_time':row['a_time'],'c_time':row['c_time']})
 
     return jsonify(result_list)

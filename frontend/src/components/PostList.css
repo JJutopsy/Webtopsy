@@ -1,0 +1,43 @@
+.status {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: green;
+    margin-right: 0.5rem;
+}
+.tagList{
+  background-color: #f2f6f8;
+  height: 80vh;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+article{
+    padding : 30px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+.tagCard{
+    font-size: 1rem; display: flex; align-items: center; margin-top: 1rem;
+    padding-right: 10px;
+}
+.Note-category-item{
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 10px;
+    margin: 0.3 rem;
+    justify-content: space-between;
+    border-radius: 50;
+    margin-bottom: 5px;
+}
+.Note-category-label{
+    display: inline-block;
+}
+.Note-category-item:hover{
+    background-color: #f2f6f8;
+}
+.Note-category-item.selected {
+    background-color: #f2f6f8;; /* 원하는 색상으로 변경하세요. */
+  }
