@@ -47,8 +47,8 @@ def process_zip_stream(zip_stream, conn):
                         (attachments) = parser.extract_attachments()
                         
                         save_location = corrected_file_name
-                        
-                        emlfile_info = (save_location, subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body)
+                        emltoblob = sqlite3.Binary(emlfile)
+                        emlfile_info = (save_location, subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body, emltoblob)
                         
                         logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
                         parsing.save_metadata_and_blob_to_db_emlVersion(conn, emlfile_info)
@@ -82,6 +82,7 @@ def process_zip_stream(zip_stream, conn):
                                 ctime = pstdata['ctime']
                                 mtime = pstdata['mtime']
                                 atime = pstdata['atime']
+                                
                                 hash = parser.calculate_hash(body)
                                 pst_info = (save_location, subject, date, sender, receiver, ctime, mtime, atime, hash, body)
                                 logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅

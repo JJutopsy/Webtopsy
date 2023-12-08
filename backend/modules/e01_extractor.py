@@ -97,8 +97,8 @@ def extract_file(directory_entry, fs_info, file_name, relative_path, db_path):
             (attachments) = parser.extract_attachments()
             
             save_location = os.path.join(relative_path, file_name)
-               
-            emlfile_info = (save_location, subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body)
+            emltoblob = sqlite3.Binary(emlfile)
+            emlfile_info = (save_location, subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body, emltoblob)
             
             logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
             parsing.save_metadata_and_blob_to_db_emlVersion(conn, emlfile_info)
@@ -132,6 +132,7 @@ def extract_file(directory_entry, fs_info, file_name, relative_path, db_path):
                     ctime = pstdata['ctime']
                     mtime = pstdata['mtime']
                     atime = pstdata['atime']
+                    
                     hash = parser.calculate_hash(body)
                     pst_info = (save_location, subject, date, sender, receiver, ctime, mtime, atime, hash, body)
                     logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅

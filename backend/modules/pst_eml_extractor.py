@@ -5,6 +5,7 @@ import hashlib
 import tempfile
 import pythoncom
 import datetime
+import sqlite3
 
 class PSTParser:
     def __init__(self, pst_data):
@@ -45,6 +46,7 @@ class PSTParser:
                     date = item.ReceivedTime
                     date = datetime.datetime(date.year, date.month, date.day, date.hour, date.minute, date.second)
 
+                    
                     # Extract additional timestamps
                     ctime = item.CreationTime
                     mtime = item.LastModificationTime

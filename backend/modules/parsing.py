@@ -91,8 +91,8 @@ def save_metadata_and_blob_to_db(conn, metadata, blob_data):
 def save_metadata_and_blob_to_db_emlVersion(conn,fileinfo):
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO emlEmails (save_location, subject, date, sender, receiver, ctime, mtime, atime, hash, body)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO emlEmails (save_location, subject, date, sender, receiver, ctime, mtime, atime, hash, body, blob_data)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''',fileinfo)
     conn.commit()
     

@@ -49,7 +49,10 @@ class PSTParser:
                 mtime TEXT,
                 atime TEXT,
                 hash TEXT,
-                body TEXT
+                body TEXT,
+                blob_data BLOB,
+                tag TEXT,
+                NNP TEXT
             )
         ''')
         connection.commit()
@@ -62,7 +65,11 @@ class PSTParser:
                 subject TEXT,
                 filename TEXT,
                 hash TEXT,
-                data BLOB
+                data BLOB,
+                plain_text TEXT,
+                isMatch TEXT,
+                tag TEXT,
+                NNP TEXT
             )
         ''')
         connection.commit()
@@ -74,7 +81,7 @@ class PSTParser:
             ctime_str = ctime.strftime('%Y-%m-%d %H:%M:%S') if ctime else None
             mtime_str = mtime.strftime('%Y-%m-%d %H:%M:%S') if mtime else None
             atime_str = atime.strftime('%Y-%m-%d %H:%M:%S') if atime else None
-
+            
             body_sha256 = self.calculate_hash(body)
             cursor = connection.cursor()
             cursor.execute('''
@@ -146,7 +153,7 @@ class PSTParser:
                     ctime = item.CreationTime
                     mtime = item.LastModificationTime
                     atime = getattr(item, 'LastAccessTime', None)  # 속성이 없는 경우 None으로 설정
-
+                    
                     self.save_email_to_database(connection, save_location, subject, date, sender, receiver, body, ctime, mtime, atime)
 
                     attachments = item.Attachments

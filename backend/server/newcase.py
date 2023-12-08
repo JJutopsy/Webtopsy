@@ -104,6 +104,7 @@ def new_case():
         atime TEXT,
         hash TEXT,
         body TEXT,
+        blob_data BLOB,
         tag TEXT,
         NNP TEXT
     )
