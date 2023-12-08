@@ -44,9 +44,3 @@ def search_keyword():
 
     return jsonify(result_list)
 
-    result_list = []
-    for row in results:
-        highlighted_content = highlight_keywords(row['content'], keyword)
-        result_list.append({'id': row['id'], 'name': row['name'], 'content': highlighted_content})
-
-    return jsonify(result_list)
