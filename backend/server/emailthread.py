@@ -97,5 +97,6 @@ class EmailDatabaseReader:
                     "match_type": match_type
                 }
                 found_emails.append(email_data)
+        sorted_emails = sorted(found_emails, key=lambda x: x['date'])
 
-        return found_emails
+        return sorted_emails
