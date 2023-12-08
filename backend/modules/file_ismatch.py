@@ -6,17 +6,18 @@ class FileProcessor:
         self.db_path = db_path
 
     def detect_file_extension(self, byte_stream):
-        signatures = {
-            b'\x50\x4B\x03\x04': 'docx, xlsx, pptx',
-            b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1': 'doc, xls, ppt, hwp',
-            b'%PDF-': 'pdf',
-        }
-
-        for signature, extension in signatures.items():
-            if byte_stream.startswith(signature):
-                return extension
-
-        return None
+        if b'\x70\x70\x74\x2F\x73\x6C\x69\x64\x65\x73\x2F\x73\x6C\x69\x64\x65\x31\x2E\x78\x6D\x6C' in byte_stream:
+            return 'pptx'
+        elif b'\x78\x6C\x2F\x77\x6F\x72\x6B\x73\x68\x65\x65\x74\x73\x2F\x73\x68\x65\x65\x74\x31\x2E\x78\x6D\x6C' in byte_stream:
+            return 'xlsx'
+        elif b'\x77\x6F\x72\x64\x2F\x64\x6F\x63\x75\x6D\x65\x6E\x74\x2E\x78\x6D\x6C' in byte_stream:
+            return 'docx'
+        elif b'\x48\x00\x77\x00\x70\x00\x53\x00\x75\x00\x6D\x00\x6D\x00\x61\x00\x72\x00\x79\x00\x49\x00\x6E\x00\x66\x00\x6F\x00\x72\x00\x6D\x00\x61\x00\x74\x00\x69\x00\x6F\x00\x6E' in byte_stream:
+            return 'hwp'
+        elif b'\x25\x40\x44\x46\x2D' in byte_stream:
+            return 'pdf'
+        else:
+            return None
 
     def process_file(self):
         # 연결된 데이터베이스에 대한 커서 생성
