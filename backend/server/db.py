@@ -151,6 +151,7 @@ def init_tables_db(db_path):
     cursor.execute("""
             CREATE TABLE IF NOT EXISTS documentmetadata (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                file_id INTEGER,
                 filename TEXT
             );
         """)
