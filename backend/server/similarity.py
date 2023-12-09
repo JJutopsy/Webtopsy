@@ -51,30 +51,33 @@ def find_similar_media(conn, key_document_id):
     cursor.execute("SELECT DocumentID, COUNT(*) as TotalCount FROM MediaFiles GROUP BY DocumentID")
     total_media_count = {row['DocumentID']: row['TotalCount'] for row in cursor.fetchall()}
 
-    # key_document_id를 제외한 모든 미디어 파일의 해시값을 가져옵니다.
-    cursor.execute("SELECT DocumentID, SHA256Hash FROM MediaFiles WHERE DocumentID != ?", (key_document_id,))
+    # key_document_id를 제외한 모든 미디어 파일의 해시값과 원본 파일 이름을 가져옵니다.
+    cursor.execute("SELECT DocumentID, SHA256Hash, SourceFileName FROM MediaFiles WHERE DocumentID != ?", (key_document_id,))
     all_other_files = cursor.fetchall()
 
     for row in all_other_files:
         doc_id = row['DocumentID']
         if row['SHA256Hash'] in key_files_hashes:
             if doc_id not in similar_documents:
-                similar_documents[doc_id] = {'matched_count': 0, 'files': []}
+                similar_documents[doc_id] = {'matched_count': 0, 'files': set()}
             similar_documents[doc_id]['matched_count'] += 1
+            similar_documents[doc_id]['files'].add(row['SourceFileName'])
 
     # 결과를 정리하여 리턴합니다.
     result = []
     for doc_id, info in similar_documents.items():
+        file_names_str = ", ".join(info['files'])  # 파일 이름 목록을 문자열로 변환
         match_ratio = f"{info['matched_count']}/{key_media_count}"  # 일치 비율 계산
         target_media_count = total_media_count.get(doc_id, 0)  # 대상 파일 미디어 전체 개수
         result.append({
             'DocumentID': doc_id,
             'TargetMediaCount': target_media_count,
+            'SourceFileNames': file_names_str,
             'MatchRatio': match_ratio
+            
         })
 
     return result
-
     
 # 완전히 동일한 해시값을 가져와서 문서를 찾는 함수
 def find_identical_documents(conn, key_document_id):
