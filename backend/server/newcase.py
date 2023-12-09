@@ -28,10 +28,11 @@ def new_case():
     casename = data['casename']
     caseinfo = data.get('caseinfo', '')  
     casedata = data['casedata']
+    caseowner = data.get('caseowner', [])
     total = data['total']
     nnp = data.get('nnp', False)
     tag = data.get('tag', False)
-
+    
     results = {
         "casename": casename,
         "caseinfo": caseinfo,

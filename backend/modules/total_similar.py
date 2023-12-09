@@ -140,7 +140,6 @@ def calculate_media_match_rate(db_path, key_file_id):
 
     return media_match_rates
 
-
 def calculate_final_similarity(db_path, key_file_id):
     # 최종 결과를 담을 리스트를 초기화합니다.
     final_ratios = []
@@ -153,7 +152,7 @@ def calculate_final_similarity(db_path, key_file_id):
     temp_ratios = {}
 
     # 모든 일치율 리스트를 순회합니다.
-    for ratio_weight, ratios in zip([0.25, 0.30, 0.20, 0.25], 
+    for ratio_weight, ratios in zip([0.20, 0.40, 0.15, 0.25], 
          [calculate_cosine_similarity(db_path, key_file_id), calculate_tag_matching_ratio(db_path, key_file_id),
           calculate_metadata_matching_ratio(db_path, key_file_id), calculate_media_match_rate(db_path, key_file_id)]):
         for file_id, ratio in ratios:
@@ -161,16 +160,17 @@ def calculate_final_similarity(db_path, key_file_id):
             if file_id in temp_ratios:
                 temp_ratios[file_id]['ratio'] += ratio * ratio_weight
             else:
-                # 파일 ID에 해당하는 파일명을 찾습니다.
+                # documentmetadata 테이블에서 파일명을 찾습니다.
                 cursor.execute("SELECT filename FROM documentmetadata WHERE file_id=?", (file_id,))
                 row = cursor.fetchone()
-                filename = row[0] if row else "Unknown File"  # 결과가 없는 경우 "Unknown File"로 설정
+                if row:  # 파일명이 존재하는 경우에만 결과에 추가합니다.
+                    temp_ratios[file_id] = {'file_id': file_id, 'filename': row[0], 'ratio': ratio * ratio_weight}
 
-                temp_ratios[file_id] = {'file_id': file_id, 'filename': filename, 'ratio': ratio * ratio_weight}
-
-    # 파일별 일치율의 평균을 계산합니다.
-    for file_id in temp_ratios:
-        final_ratios.append(temp_ratios[file_id])
+    # 파일별 일치율의 평균을 계산하여 결과에 추가합니다.
+    for file_id, data in temp_ratios.items():
+        data['ratio'] = round(data['ratio'], 2)  # 유사도 점수를 소수점 두 자리까지 반올림합니다.
+        if data['ratio'] >= 50:  # 유사도가 50 이상인 파일만 최종 결과에 추가합니다.
+            final_ratios.append(data)
 
     conn.close()
 
