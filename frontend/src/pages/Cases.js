@@ -32,6 +32,7 @@ export default function Cases() {
   const [info, setInfo] = useState("");
   const [open, setOpen] = useState(false);
   const [cases, setCases] = useState([]);
+
   const [value, setValue] = React.useState("1");
   const [isCommentAllowed, setIsCommentAllowed] = useState(true); // 코멘트 달기 권한을 저장할 state
 
@@ -63,10 +64,12 @@ export default function Cases() {
       setOpen(true);
     } else {
       const currentItems = selectedItems.map(item => item.current);
+      const owners = selectedItems.map(item=>item.owner);
       const data = {
         casename: name,
         caseinfo: info,
         casedata: currentItems,
+        caseowner: owners,
         total: selectedItems.length,
         nnp: true,
         tag: true,
@@ -164,7 +167,7 @@ export default function Cases() {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Box sx={{ width: "100%", typography: "body1", height: "350px" }}>
+            <Box sx={{ width: "100%", typography: "body1", height: "500px" }}>
               <TabContext value={value}>
                 <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                   <TabList

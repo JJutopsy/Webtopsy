@@ -4,8 +4,10 @@ import './CodeWithComments.css';
 import { BsThreeDots } from 'react-icons/bs';
 import { useRecoilState } from 'recoil';
 import { LoginName } from '../atom/LoginName';
+import { Stack } from '@mui/material';
 const CodeWithComments = ({ code, db_path }) => {
     console.log(code)
+    const [activeTab, setActiveTab] = useState('plain');
     const [User, setUser] = useRecoilState(LoginName);
     const [show, setShow] = useState(false);
     const [selectedLine, setSelectedLine] = useState(null);
@@ -66,7 +68,13 @@ const CodeWithComments = ({ code, db_path }) => {
     const handleCommentChange = (e) => {
         setComment(e.target.value);
     };
+    const handleLineClick = (lineNumber) => {
+        // 탭을 'plain'으로 변경합니다.
+        setActiveTab('plain');
 
+        // 스크롤을 해당 라인으로 이동시킵니다.
+        // scroll.scrollTo(lineNumber * lineHeight); // lineHeight는 라인의 높이를 나타내는 값입니다.
+    };
     const submitComment = () => {
         const newComment = {
             post_id: code.id,
@@ -98,7 +106,7 @@ const CodeWithComments = ({ code, db_path }) => {
     return (
         <div>
             <Tabs
-                defaultActiveKey="plain"
+                defaultActiveKey={activeTab}
                 id="justify-tab-example"
                 className="mb-3"
                 justify
@@ -162,8 +170,114 @@ const CodeWithComments = ({ code, db_path }) => {
                     </div>
                 </Tab>
                 <Tab eventKey="metadata" title="메타데이터 정보">
-                    <Table>
+                    <Table striped bordered hover style={{ width: "50wv" }}>
+                        <thead>
+                            <tr>
+                                <th>메타데이터</th>
+                                <th>값</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>파일 경로</th>
+                                <th>
+
+                                    {code.file_path}
+
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <pre>생성 시간</pre>
+                                </th>
+                                <th>{code.c_time}</th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <pre>수정 시간</pre>
+                                </th>
+                                <th>{code.m_time}</th>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <pre>마지막 접근 시간</pre>
+                                </th>
+                                <th>{code.a_time}</th>
+                            </tr>
+                            <tr>
+                                <th>해시값<br></br>(sha-256)</th>
+                                <th>
+                                    {code.hash}
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>주요 태그</th>
+                                <th>
+                                    {
+                                        code.tag
+                                    }
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>검출된 인명</th>
+                                <th>
+                                    {
+                                        code.NNP.split(',').filter(item => item.split('_')[1] === '인명').map(e => e.replace("_인명", "")).join(', ')
+                                    }
+                                </th>
+
+                            </tr>
+                            <tr>
+                                <th>검출된 기관명</th>
+                                <th>
+                                    {
+                                        code.NNP.split(',').filter(item => item.split('_')[1] === '기관명').map(e => e.replace("_기관명", "")).join(', ')
+                                    }
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>기타</th>
+                                <th>
+                                    {
+                                        code.NNP.split(',').filter(item => item.split('_')[1] === '기타').map(e => e.replace("_기타", "")).join(', ')
+                                    }
+                                </th>
+                            </tr>
+                        </tbody>
                     </Table>
+                    <ListGroup>
+                        <ListGroup.Item>전체 코멘트</ListGroup.Item>
+                        <ListGroup.Item>
+                            <Table striped bordered hover style={{ width: "50wv" }}>
+
+                                <thead>
+                                    <tr>
+                                        <th>라인</th>
+                                        <th>작성자</th>
+                                        <th>내용</th>
+                                        <th>작성 시간</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {comments.map((comment, i) => (
+                                        <tr key={i} onClick={() => handleLineClick(comment.type)}>
+                                            <td>#{comment.type}</td>
+                                            <td>{comment.username}</td>
+                                            <td>{comment.context}</td>
+                                            <td>{comment.created_at}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        </ListGroup.Item>
+                    </ListGroup>
+
+
+                    <Stack direction='row' spacing={3}>
+                        <Button variant='primary'>이 문서 다운로드</Button>
+                        <Button variant='primary'>동일 양식 문서 추적</Button>
+                    </Stack>
+
                 </Tab>
             </Tabs>
 

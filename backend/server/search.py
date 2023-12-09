@@ -4,7 +4,7 @@ import os
 import re
 import sys
 from dotenv import load_dotenv
-
+from datetime import datetime
 search_bp = Blueprint('search', __name__)
 
 def highlight_keywords(text, keyword):
@@ -36,11 +36,16 @@ def search_keyword():
  
         return '검색 결과가 없습니다.', 404
 
+    
     result_list = []
     for row in results:
         if row['tag'] and row['NNP']:
-            result_list.append({'id': row['id'], 'file_path': row['file_path'], 'plain_text': row['plain_text'], 'tag':row['tag'], 'NNP':row['NNP'], 'm_time':row['m_time'],'a_time':row['a_time'],'c_time':row['c_time']})
+            m_time = datetime.strptime(row['m_time'], "%a %b %d %H:%M:%S %Y").strftime("%Y-%m-%d %H:%M")
+            a_time = datetime.strptime(row['a_time'], "%a %b %d %H:%M:%S %Y").strftime("%Y-%m-%d %H:%M")
+            c_time = datetime.strptime(row['c_time'], "%a %b %d %H:%M:%S %Y").strftime("%Y-%m-%d %H:%M")
 
+            result_list.append({'id': row['id'], 'file_path': row['file_path'], 'plain_text': row['plain_text'], 'hash':row['hash_value'], 'tag':row['tag'], 'NNP':row['NNP'], 'm_time':m_time,'a_time':a_time,'c_time':c_time})
+    
     return jsonify(result_list)
 
 

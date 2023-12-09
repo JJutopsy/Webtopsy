@@ -69,7 +69,7 @@ const DirectoryBrowser = ({ onSelectedItemsChange }) => {
     if (event.target.checked) {
       setCheckedItems((prevItems) => [
         ...prevItems,
-        { current: filePath, previous: null, color: badgeColor },
+        { current: filePath, owner: null, color: badgeColor },
       ]);
     } else {
       setCheckedItems((prevItems) =>
@@ -80,6 +80,7 @@ const DirectoryBrowser = ({ onSelectedItemsChange }) => {
 
   useEffect(() => {
     onSelectedItemsChange(checkedItems);
+    console.log(checkedItems);
   }, [checkedItems]);
 
   return (
@@ -94,7 +95,7 @@ const DirectoryBrowser = ({ onSelectedItemsChange }) => {
             onKeyDown={handleKeyPress}
           />
         </Form.Group>
-        <div style={{ height: "250px", overflow: "auto" }}>
+        <div style={{ height: "400px", overflow: "auto" }}>
           <List style={{ maxHeight: "90%", overflow: "auto" }}>
             <ListItem button onClick={() => onFileClick("..")}>
               <ArrowBackIcon style={{ marginRight: "0.5rem" }} /> 이전
@@ -139,48 +140,48 @@ const DirectoryBrowser = ({ onSelectedItemsChange }) => {
           <br></br>
           {checkedItems.map((item, index) => (
             <div style={{ display: "block", marginRight: "10px" }}>
-              <OverlayTrigger
-                key={index}
-                placement="top"
-                overlay={
-                  <Tooltip id={`tooltip-${index}`}>
-                    수집 증거물 경로: {item.previous || "없음"}
-                  </Tooltip>
-                }
-              >
-                <Badge
-                  bg={item.color}
-                  text={item.color == "warning" ? "dark" : ""}
-                  style={{ marginRight: "10px", cursor: "pointer" }} // cursor를 pointer로 설정하여 클릭 가능함을 표시
-                  onClick={() => {
-                    // 클릭 이벤트 추가
-                    setCheckedItems((prevItems) =>
-                      prevItems.filter((_, i) => i !== index)
-                    ); // 클릭한 아이템을 제외한 나머지 아이템들로 상태 업데이트
-                  }}
-                >
-                  {item.current}
-                </Badge>
-              </OverlayTrigger>
 
+              <Badge
+                bg={item.color}
+                text={item.color == "warning" ? "dark" : ""}
+                style={{ marginRight: "10px", cursor: "pointer" }} // cursor를 pointer로 설정하여 클릭 가능함을 표시
+                onClick={() => {
+                  // 클릭 이벤트 추가
+                  setCheckedItems((prevItems) =>
+                    prevItems.filter((_, i) => i !== index)
+                  ); // 클릭한 아이템을 제외한 나머지 아이템들로 상태 업데이트
+                }}
+              >
+                {item.current}
+              </Badge>
+
+              {item.owner &&
+                <Badge
+                  bg="danger"
+                  style={{ marginRight: "10px", cursor: "pointer" }}
+                >
+                  {item.owner}
+                </Badge>
+              }
               <Badge
                 bg="secondary" // Badge 색을 회색으로 변경
                 style={{ marginRight: "10px", cursor: "pointer" }} // cursor를 pointer로 설정하여 클릭 가능함을 표시
                 onClick={() => {
                   const newName = prompt("새 이름을 입력하세요.");
-                  if (newName) {
-                    setCheckedItems((prevItems) =>
-                      prevItems.map((item, i) =>
-                        i === index
-                          ? {
-                              current: newName,
-                              previous: item.current,
-                              color: item.color,
-                            }
-                          : item
-                      )
-                    );
-                  }
+                  
+                  setCheckedItems((prevItems) =>
+                    prevItems.map((item, i) =>
+                      i === index
+                        ? {
+                          owner: newName,
+                          current: item.current,
+                          color: item.color,
+                        }
+                        : item
+                    )
+                  );
+                  
+
                 }}
               >
                 이름 변경

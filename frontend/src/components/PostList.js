@@ -136,7 +136,9 @@ function PostList() {
 
     setRows(processedData);
   };
-
+  useEffect(()=>{
+    handleSearch();
+  },[]);
   return (
     <>
       <div className="topbar" style={{
