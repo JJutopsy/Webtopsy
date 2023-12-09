@@ -84,8 +84,9 @@ def new_case():
     logging.info("Case ID: %s", case_id)
 
     for item in casedata:
+        
         detail = process_item(item, parsingDBpath)
-        xml_extractor.process_files(parsingDBpath)
+       # xml_extractor.process_files(parsingDBpath)
         results['details'].append(detail)
 
     # files 테이블에 대한 NNP와 태그 데이터 업데이트

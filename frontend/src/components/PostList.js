@@ -45,10 +45,13 @@ import { useRecoilState } from "recoil";
 import { LoginName } from "../atom/LoginName";
 import "./PostList.css";
 import Result from "./Result";
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
 
 function PostList() {
 
-
+  const [startDate, setStartDate] = useState(new Date());
 
   // URL에서 쿼리 스트링 추출
   const queryString = window.location.search;
@@ -183,7 +186,7 @@ function PostList() {
       </div>
       <Container fluid>
         <div style={{ display: 'flex' }}>
-          <Col md={3}>
+          <Col md={2}>
             <div className="tagList">
               <Card>
                 <Card.Header>
@@ -193,9 +196,6 @@ function PostList() {
                     </Nav.Item>
                     <Nav.Item>
                       <Nav.Link eventKey="second">코멘트 보기</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="third">북마크</Nav.Link>
                     </Nav.Item>
                   </Nav>
                 </Card.Header>
