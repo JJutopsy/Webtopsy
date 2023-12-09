@@ -43,7 +43,7 @@ const CodeWithComments = ({ code, db_path }) => {
 
     useEffect(() => {
         fetchComments();
-    }, [code.id, db_path]);
+    }, [code.id, db_path, activeTab]);
     const isLineHighlighted = (lineNumber) => {
         return comments.some(comment => comment.type === lineNumber);
     }
@@ -69,9 +69,7 @@ const CodeWithComments = ({ code, db_path }) => {
         setComment(e.target.value);
     };
     const handleLineClick = (lineNumber) => {
-        // 탭을 'plain'으로 변경합니다.
         setActiveTab('plain');
-
         // 스크롤을 해당 라인으로 이동시킵니다.
         // scroll.scrollTo(lineNumber * lineHeight); // lineHeight는 라인의 높이를 나타내는 값입니다.
     };
@@ -90,13 +88,10 @@ const CodeWithComments = ({ code, db_path }) => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(newComment),
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
+        }).then(response => response.json()).then(data => {
+            console.log('Success:', data);
+        }).catch((error) => {
+            console.error('Error:', error);
             });
         setComment("");
         fetchComments();
@@ -106,7 +101,8 @@ const CodeWithComments = ({ code, db_path }) => {
     return (
         <div>
             <Tabs
-                defaultActiveKey={activeTab}
+                defaultActiveKey="plain"
+                onSelect={(k) => setActiveTab(k)}
                 id="justify-tab-example"
                 className="mb-3"
                 justify
@@ -116,12 +112,11 @@ const CodeWithComments = ({ code, db_path }) => {
                     backgroundColor: "#E9EDF5",
                 }}
             >
-                <Tab eventKey="plain" title={<span>본문 <Badge variant="secondary">{comments.length}</Badge></span>}>
+                <Tab eventKey="plain" title={<span>본문 <Badge variant="secondary">{comments.length}</Badge></span>} onClick={() => setActiveTab("plain")}>
                     <div style={{ fontFamily: 'monospace' }}>
                         {lines.map((line, index) => {
                             const lineNumber = index + 1;
-                            const commentsForLine = comments.filter(comment => parseInt(comment.type) === lineNumber); // 해당 라인에 대한 모든 코멘트를 찾습니다.
-
+                            const commentsForLine = comments.filter(comment => parseInt(comment.type) === lineNumber); //해당 라인에 대한 모든 코멘트를 찾습니다.
                             const renderTooltip = (props) => (
                                 <Tooltip id={`line-${lineNumber}-tooltip`} {...props} bsPrefix="tooltip-custom">
                                     {commentsForLine.map((comment, i) => (
@@ -132,7 +127,6 @@ const CodeWithComments = ({ code, db_path }) => {
                                     ))}
                                 </Tooltip>
                             );
-
                             return (
                                 <div style={fetchedLines.includes(lineNumber) || highlightedLines.includes(lineNumber) ? { backgroundColor: '#FFF78A' } : {}}>
                                     <code style={{ display: 'flex', alignItems: 'center' }}>
@@ -169,7 +163,7 @@ const CodeWithComments = ({ code, db_path }) => {
 
                     </div>
                 </Tab>
-                <Tab eventKey="metadata" title="메타데이터 정보">
+                <Tab eventKey="metadata" title="메타데이터 정보" onClick={() => setActiveTab("metadata")}>
                     <Table striped bordered hover style={{ width: "50wv" }}>
                         <thead>
                             <tr>
@@ -181,9 +175,7 @@ const CodeWithComments = ({ code, db_path }) => {
                             <tr>
                                 <th>파일 경로</th>
                                 <th>
-
                                     {code.file_path}
-
                                 </th>
                             </tr>
                             <tr>
@@ -213,34 +205,26 @@ const CodeWithComments = ({ code, db_path }) => {
                             <tr>
                                 <th>주요 태그</th>
                                 <th>
-                                    {
-                                        code.tag
-                                    }
+                                    {code.tag}
                                 </th>
                             </tr>
                             <tr>
                                 <th>검출된 인명</th>
                                 <th>
-                                    {
-                                        code.NNP.split(',').filter(item => item.split('_')[1] === '인명').map(e => e.replace("_인명", "")).join(', ')
-                                    }
+                                    {code.NNP.split(',').filter(item => item.split('_')[1] === '인명').map(e => e.replace("_인명", "")).join(', ')}
                                 </th>
 
                             </tr>
                             <tr>
                                 <th>검출된 기관명</th>
                                 <th>
-                                    {
-                                        code.NNP.split(',').filter(item => item.split('_')[1] === '기관명').map(e => e.replace("_기관명", "")).join(', ')
-                                    }
+                                    {code.NNP.split(',').filter(item => item.split('_')[1] === '기관명').map(e => e.replace("_기관명", "")).join(', ')}
                                 </th>
                             </tr>
                             <tr>
                                 <th>기타</th>
                                 <th>
-                                    {
-                                        code.NNP.split(',').filter(item => item.split('_')[1] === '기타').map(e => e.replace("_기타", "")).join(', ')
-                                    }
+                                    {code.NNP.split(',').filter(item => item.split('_')[1] === '기타').map(e => e.replace("_기타", "")).join(', ')}
                                 </th>
                             </tr>
                         </tbody>
@@ -271,9 +255,8 @@ const CodeWithComments = ({ code, db_path }) => {
                             </Table>
                         </ListGroup.Item>
                     </ListGroup>
-
-
-                    <Stack direction='row' spacing={3}>
+                    <hr></hr>
+                    <Stack direction='row' spacing={1}>
                         <Button variant='primary'>이 문서 다운로드</Button>
                         <Button variant='primary'>동일 양식 문서 추적</Button>
                     </Stack>
