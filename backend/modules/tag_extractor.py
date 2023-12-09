@@ -21,7 +21,7 @@ class KeywordExtractor:
     def tokenize_words(self, text):
         m = MeCab.Tagger()
         words = m.parse(text).split()
-        words = [word.split('\t')[0] for word in words if 'NNG' in word and len(word) > 1]
+        words = [word.split('\t')[0] for word in words if 'NNG' in word and len(word.split('\t')[0]) > 1]
         return words
 
     def create_graph(self, tokens):
