@@ -43,6 +43,7 @@ def search_keyword():
 
     return jsonify(result_list)
 
+
 @search_bp.route('/keyword/email', methods=['POST'])
 def search_Email_keyword():
     load_dotenv()

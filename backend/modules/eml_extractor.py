@@ -65,6 +65,7 @@ class EmlParser:
                 attachments.append((filename, content_type, body, plain_text))
         return attachments
 
+
     def extract_body(self):
         body = ""
         if self.msg.is_multipart():
@@ -145,35 +146,3 @@ class EmlParser:
         hash_value = self.calculate_hash(mail_body.encode())
 
         return subject, formatted_date, from_, to, ctime, mtime, atime, hash_value, mail_body
-
-
-'''
-if __name__ == "__main__":
-    # EML 파일을 바이트 스트림으로 읽어옴
-    with open(r"C:\\Users\\ksh88\\OneDrive\\문서\\카카오톡 받은 파일\\FW_ ORD11.089.w3x_230914\\FW_ ORD11.089.w3x_230914\\20170511_11991_제7기 IP 마이스터프로그램 모집공고(~6_9).eml", "rb") as eml_file:
-        eml_data = eml_file.read()
-
-        # EML 데이터를 사용하여 EmlParser 인스턴스를 생성
-        parser = EmlParser(eml_data)
-
-        # EML 파일 정보 추출
-        subject, date, from_, to, ctime, mtime, atime, hash_value, mail_body = parser.process_eml()
-        #attachments = parser.extract_attachments()
-
-        # 추출한 정보 출력
-        print("Subject:", subject)
-        print("Date:", date)
-        print("From:", from_)
-        print("To:", to)
-        print("Mail Body:", mail_body)
-        print("Hash:", hash_value)
-
-        # if attachments:
-        #     print("Attachments:")
-        #     for filename, content_type, body, text_content in attachments:
-        #         print("  Filename:", filename)
-        #         print("  Content Type:", content_type)
-        #         print("  Body:", body)
-        #         print("  Text Content:", text_content)
-'''
-

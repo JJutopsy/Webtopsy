@@ -128,7 +128,8 @@ def process_files_in_directory(directory, conn, parsingDBpath):
                                 (subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body) = parser.process_eml()
                                 (attachments) = parser.extract_attachments()
                                 save_location = file_path
-                                emlfile_info = (save_location, subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body)
+                                emltoblob = sqlite3.Binary(emlfile)
+                                emlfile_info = (save_location, subject, date, from_, to, ctime, mtime, atime, md5_hash, mail_body,emltoblob)
                                 logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
                                 save_metadata_and_blob_to_db_emlVersion(conn, emlfile_info)
                                 logging.info("Data saved to DB: %s", emlfile_info)  # DB에 데이터 저장 후 로깅
@@ -177,8 +178,8 @@ def save_metadata_and_blob_to_db_emlAttachmentsVersion(conn, fileinfo):
 def save_metadata_and_blob_to_db_emlVersion(conn,fileinfo):
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO emlEmails (save_location, subject, date, sender, receiver, ctime, mtime, atime, hash, body)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO emlEmails (save_location, subject, date, sender, receiver, ctime, mtime, atime, hash, body, blob_data)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''',fileinfo)
     conn.commit()
 
@@ -217,13 +218,11 @@ def process_directories(directories, parsingDBpath):
             conn.close()
 
     return 200, "Success"
-    
-# DB 연결 및 테이블 생성 부분에서 blob_data 컬럼 추가
+
 
 # 화이트리스트 확장자
 whitelist_extensions = ('.doc', '.docx', '.pptx', '.xlsx', '.pdf', '.hwp', '.eml',
     '.pst', '.ost', '.ppt', '.xls', '.csv', '.txt','.zip','.7z')
-
 
 # get_parsing_db_path 함수 정의 (casedb에서 parsingDBpath 값을 조회)
 def get_parsing_db_path(case_id):

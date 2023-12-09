@@ -85,7 +85,7 @@ def init_tables_db(db_path):
     )
     ''')
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS emlEmails (
+    CREATE TABLE IF NOT EXISTS emlEmails (
         save_location TEXT,
         subject TEXT,
         date TEXT,     
@@ -96,6 +96,7 @@ def init_tables_db(db_path):
         atime TEXT,
         hash TEXT,
         body TEXT,
+        blob_data BLOB,
         tag TEXT,
         NNP TEXT
     )
@@ -114,22 +115,25 @@ def init_tables_db(db_path):
     ''')
     
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS pstAttachments (
+    CREATE TABLE IF NOT EXISTS pstAttachments (
         save_location TEXT,
         subject TEXT,
         filename TEXT,
         hash TEXT,
         data BLOB,
         plain_text TEXT,
+        isMatch TEXT,
         tag TEXT,
         NNP TEXT
     )
     ''')
     
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS emlPerson (
+    CREATE TABLE IF NOT EXISTS emlPerson (
         emlPerson TEXT,
-        relatedPerson TEXT
+        relatedPerson TEXT,
+        seCount INTEGER,
+        reCount INTEGER
     )
     ''')
 
@@ -152,7 +156,5 @@ def init_tables_db(db_path):
         filename TEXT
     )
     """)
-    
-    
     conn.commit()
     conn.close()
