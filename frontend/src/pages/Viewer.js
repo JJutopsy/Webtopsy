@@ -11,6 +11,9 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import HelpIcon from '@material-ui/icons/Help';
 import Dashboard from "./Dashboard";
+import DashTable from "../components/DashTable";
+import EmailList from "../components/EmailList";
+
 
 export default function Viewer() {
 
@@ -65,18 +68,15 @@ export default function Viewer() {
         >
           <Tab eventKey="first" title="Dashbaord" >
             <Box sx={{ backgroundColor: "#E9EDF5"}} >
-              <Dashboard />
+              <br></br>
+              <DashTable/>
             </Box>
           </Tab>
           <Tab eventKey="second" title="Search & Review">
-
-            <Box sx={{ backgroundColor: "#E9EDF5" }}>
               <PostList />
-            </Box>
           </Tab>
           <Tab eventKey="third" title="Email Investigation">
-            <br></br>
-            <p>Email Aduit Page</p>
+            <EmailList/>
           </Tab>
         </Tabs>
       </div>

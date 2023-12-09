@@ -47,7 +47,7 @@ const Dashboard = () => {
               <Stack>
                 <Typography variant="h6" align="center">Case 정보 전체 요약</Typography>
               </Stack>
-              <div style={{ height: '300px', width: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <div style={{ height: '300px', width: '500px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <Doughnut data={pieChartData} />
               </div>
               
