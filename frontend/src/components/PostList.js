@@ -136,7 +136,9 @@ function PostList() {
 
     setRows(processedData);
   };
-
+  useEffect(()=>{
+    handleSearch();
+  },[]);
   return (
     <>
       <div className="topbar" style={{
@@ -280,9 +282,9 @@ function PostList() {
               </Card>
             </div>
           </Col>
-          <Col md={9}>
+          <Col md={10}>
             <div className="searchResult">
-              <Result rows={filteredRows} />
+              <Result rows={filteredRows} db_path={db_path} />
             </div>
           </Col>
         </div>

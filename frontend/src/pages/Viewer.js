@@ -13,10 +13,12 @@ import HelpIcon from '@material-ui/icons/Help';
 import Dashboard from "./Dashboard";
 import DashTable from "../components/DashTable";
 import EmailList from "../components/EmailList";
+import { useRecoilState } from "recoil";
+import { LoginName } from "../atom/LoginName";
 
 
 export default function Viewer() {
-
+  const [User, setUser] = useRecoilState(LoginName);
   const [key, setKey] = useState('first');
 
   return (
@@ -50,7 +52,7 @@ export default function Viewer() {
                 <IconButton color="inherit">
                   <HelpIcon />
                 </IconButton>
-                <Button color="inherit">UserName</Button>
+                <Button color="inherit">{User}</Button>
               </Stack>
             </div>
           </Toolbar>

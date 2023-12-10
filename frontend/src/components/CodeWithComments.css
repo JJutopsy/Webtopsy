@@ -14,3 +14,12 @@
 .block{
     width: 40px;
 }
+.tooltip-custom {
+  max-width: 500px;  /* Tooltip의 최대 너비를 200px로 설정합니다. */
+  z-index: 1000;
+  margin-left: 200px;
+  background-color: white;
+  border-radius: 50;
+  border: 2px solid;
+
+}
