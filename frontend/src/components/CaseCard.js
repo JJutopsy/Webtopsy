@@ -12,6 +12,8 @@ export default function CaseCard({ caseItem }) {
 
   useEffect(() => {
     if (buttonStateValue) {
+      const data = JSON.stringify(caseItem);
+      localStorage.setItem('caseInfo', data);
       navigate("/case/example?path=" + encodeURIComponent(caseItem.parsingDBpath));  // 페이지를 이동합니다.
     }
   }, [buttonStateValue, navigate]);  // navigate를 의존성 배열에 추가합니다.

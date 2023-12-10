@@ -10,6 +10,48 @@ search_bp = Blueprint('search', __name__)
 def highlight_keywords(text, keyword):
     highlighted = re.sub(f'({keyword})', r'<b>\1</b>', text, flags=re.IGNORECASE)
     return highlighted
+@search_bp.route('/keyword/<int:file_id>', methods=['POST'])
+def search_id(file_id):
+    load_dotenv()
+
+    data = request.get_json()
+    parsingDBpath = os.environ.get("REACT_APP_HOME") + "/" + data.get('parsingDBpath')
+
+    if not os.path.exists(parsingDBpath):
+        return '데이터베이스 파일을 찾을 수 없습니다.', 404
+
+    conn = sqlite3.connect(parsingDBpath)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    query = "SELECT * FROM files WHERE id = ?"
+    result = cursor.execute(query, (file_id,)).fetchone()
+
+    conn.close()
+
+    if not result:
+        return '검색 결과가 없습니다.', 404
+
+    row = dict(result)
+    if row['tag'] and row['NNP']:
+        m_time = datetime.strptime(row['m_time'], "%a %b %d %H:%M:%S %Y").strftime("%Y-%m-%d %H:%M")
+        a_time = datetime.strptime(row['a_time'], "%a %b %d %H:%M:%S %Y").strftime("%Y-%m-%d %H:%M")
+        c_time = datetime.strptime(row['c_time'], "%a %b %d %H:%M:%S %Y").strftime("%Y-%m-%d %H:%M")
+
+        result_dict = {
+        'id': row['id'],
+        'file_path': row['file_path'],
+        'owner': row['owner'],
+        'plain_text': row['plain_text'],
+        'hash': row['hash_value'],
+        'tag': row['tag'],
+        'NNP': row['NNP'],
+        'm_time': m_time,
+        'a_time': a_time,
+        'c_time': c_time
+        }
+
+    return jsonify(result_dict)
 
 @search_bp.route('/keyword', methods=['POST'])
 def search_keyword():
@@ -44,7 +86,7 @@ def search_keyword():
             a_time = datetime.strptime(row['a_time'], "%a %b %d %H:%M:%S %Y").strftime("%Y-%m-%d %H:%M")
             c_time = datetime.strptime(row['c_time'], "%a %b %d %H:%M:%S %Y").strftime("%Y-%m-%d %H:%M")
 
-            result_list.append({'id': row['id'], 'file_path': row['file_path'], 'plain_text': row['plain_text'], 'hash':row['hash_value'], 'tag':row['tag'], 'NNP':row['NNP'], 'm_time':m_time,'a_time':a_time,'c_time':c_time})
+            result_list.append({'id': row['id'], 'file_path': row['file_path'], 'owner':row['owner'], 'plain_text': row['plain_text'], 'hash':row['hash_value'], 'tag':row['tag'], 'NNP':row['NNP'], 'm_time':m_time,'a_time':a_time,'c_time':c_time})
     
     return jsonify(result_list)
 

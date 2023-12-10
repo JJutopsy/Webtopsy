@@ -20,7 +20,8 @@ import { LoginName } from "../atom/LoginName";
 export default function Viewer() {
   const [User, setUser] = useRecoilState(LoginName);
   const [key, setKey] = useState('first');
-
+  const dataString = localStorage.getItem('caseInfo');
+  const caseInfo = JSON.parse(dataString);
   return (
     <>
       <div style={{ position: "sticky", top: 0, zIndex: 1 }}>
@@ -36,7 +37,7 @@ export default function Viewer() {
                   |
                 </Typography>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px', fontWeight: "bold" }}>
-                  CASENAME
+                  {caseInfo.casename}
                 </Typography>
               </Stack>
             </div>

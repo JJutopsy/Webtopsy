@@ -60,7 +60,7 @@ export default function Cases() {
   };
 
   const sendCaseRequest = () => {
-    if (name === "" || info === "" || selectedItems.length === 0) {
+    if (name === "" || selectedItems.length === 0) {
       setOpen(true);
     } else {
       const currentItems = selectedItems.map(item => item.current);
@@ -68,8 +68,7 @@ export default function Cases() {
       const data = {
         casename: name,
         caseinfo: info,
-        casedata: currentItems,
-        caseowner: owners,
+        filesWithOwners : selectedItems,
         total: selectedItems.length,
         nnp: true,
         tag: true,

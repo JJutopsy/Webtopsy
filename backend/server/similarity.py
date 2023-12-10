@@ -17,7 +17,6 @@ def similarity_analysis():
     data = request.json
     db_path = data['parsingDBpath']
     key_document_id = data['key_document_id']
-
     with sqlite3.connect(db_path) as conn:
         conn.row_factory = sqlite3.Row
         # 유사한 미디어 파일이 포함된 문서 찾기

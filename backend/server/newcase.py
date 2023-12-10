@@ -84,7 +84,7 @@ def new_case():
     logging.info("Case ID: %s", case_id)
 
     for fileInfo in filesWithOwners:
-        filePath = fileInfo['path']
+        filePath = fileInfo['current']
         owner = fileInfo['owner']
         detail, item = process_item(filePath, parsingDBpath)
         if owner and item:
@@ -179,6 +179,7 @@ def update_owner(db_path, file_path, owner):
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         logging.info(f"Updating owner for file_path: {file_path} with owner: {owner}")
+        owner = file_path+","+owner
         cursor.execute("UPDATE files SET owner = ? WHERE file_path LIKE ?;", (owner, file_path + '%'))
         conn.commit()
     except Exception as e:
