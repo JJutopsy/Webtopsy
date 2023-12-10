@@ -27,8 +27,7 @@ def new_case():
     data = request.json
     casename = data['casename']
     caseinfo = data.get('caseinfo', '')  
-    casedata = data['casedata']
-    caseowner = data.get('caseowner', [])
+    filesWithOwners = data['filesWithOwners']
     total = data['total']
     nnp = data.get('nnp', False)
     tag = data.get('tag', False)
@@ -84,10 +83,14 @@ def new_case():
     case_id = cursor.lastrowid
     logging.info("Case ID: %s", case_id)
 
-    for item in casedata:
-        
-        detail = process_item(item, parsingDBpath)
-       # xml_extractor.process_files(parsingDBpath)
+    for fileInfo in filesWithOwners:
+        filePath = fileInfo['path']
+        owner = fileInfo['owner']
+        detail, item = process_item(filePath, parsingDBpath)
+        if owner and item:
+            update_owner(parsingDBpath, item, owner)
+
+        xml_extractor.process_files(parsingDBpath)
         results['details'].append(detail)
 
     # files 테이블에 대한 NNP와 태그 데이터 업데이트
@@ -168,7 +171,20 @@ def process_item(item, parsingDBpath):
     except Exception as e:
         logging.error(f"An error occurred while calling process_e01: {str(e)}")
         detail['status'], detail['message']= 500, str(e)
-    return detail
+    return detail, item
+
+
+def update_owner(db_path, file_path, owner):
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        logging.info(f"Updating owner for file_path: {file_path} with owner: {owner}")
+        cursor.execute("UPDATE files SET owner = ? WHERE file_path LIKE ?;", (owner, file_path + '%'))
+        conn.commit()
+    except Exception as e:
+        logging.error(f"Error in update_owner: {e}")
+    finally:
+        conn.close()
 
 def update_tags_based_on_text(parsingDBpath, nnp, tag):
     # 데이터베이스 연결을 한 번만 엽니다.

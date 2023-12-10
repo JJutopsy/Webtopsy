@@ -48,7 +48,7 @@ class EWFImgInfo(pytsk3.Img_Info):
         return self._ewf_handle.get_media_size()
 
 # 디렉터리 처리 함수
-def process_directory(directory, fs_info, relative_path, db_path):
+def process_directory(directory, fs_info, relative_path, db_path,image_path):
     for directory_entry in directory:
         try:
             if directory_entry.info.meta is None:
@@ -72,14 +72,14 @@ def process_directory(directory, fs_info, relative_path, db_path):
 
                 if ext.lower() in desired_extensions:
                     logging.info(f"Found file: {os.path.join(relative_path, file_name)}")
-                    extract_file(directory_entry, fs_info, file_name, relative_path, db_path)
+                    extract_file(directory_entry, fs_info, file_name, relative_path, db_path,image_path)
 
         except Exception as e:
             logging.error(f"Error occurred while processing directory: {e}")
             continue
 
 # 파일 추출 함수
-def extract_file(directory_entry, fs_info, file_name, relative_path, db_path):
+def extract_file(directory_entry, fs_info, file_name, relative_path, db_path,image_path):
     try:
         file_object = fs_info.open_meta(inode=directory_entry.info.meta.addr)
         file_data = file_object.read_random(0, file_object.info.meta.size)
@@ -150,7 +150,7 @@ def extract_file(directory_entry, fs_info, file_name, relative_path, db_path):
             blob_data = sqlite3.Binary(file_data)
 
             file_info_log = (os.path.join(relative_path, file_name), hash_value, m_time.strftime("%Y-%m-%d %H:%M:%S"), a_time.strftime("%Y-%m-%d %H:%M:%S"), c_time.strftime("%Y-%m-%d %H:%M:%S"))
-            file_info = (os.path.join(relative_path, file_name), hash_value, file_text, m_time.strftime("%Y-%m-%d %H:%M:%S"), a_time.strftime("%Y-%m-%d %H:%M:%S"), c_time.strftime("%Y-%m-%d %H:%M:%S"))
+            file_info = (image_path+"\\"+os.path.join(relative_path, file_name), hash_value, file_text, m_time.strftime("%Y-%m-%d %H:%M:%S"), a_time.strftime("%Y-%m-%d %H:%M:%S"), c_time.strftime("%Y-%m-%d %H:%M:%S"))
             logging.info("File info before saving to DB: %s", str(file_info_log))  # file_info 변수의 일부 값을 로깅으로 확인
 
             logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
@@ -195,7 +195,7 @@ def process_e01(image_path, parsing_db_path):
         directory = fs_info.open_dir(path="/")
         
         db_path = parsing_db_path  # db_path 정의
-        process_directory(directory, fs_info, "", db_path) # db_path 전달
+        process_directory(directory, fs_info, "", db_path,image_path) # db_path 전달
         
         # 리소스 정리
         ewf_img_info.close()

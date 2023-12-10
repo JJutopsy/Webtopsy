@@ -68,7 +68,7 @@ def extract_text(file_data, ext):
             except Exception as e:
                 logging.error(f"An unexpected error occurred: {e}")
         else:
-            print(f"지원하지 않는 파일 형식: {ext}")
+            pass
     except Exception as e:
         logging.error(f"Error occurred during text extraction: {e}, File Extension: {ext}")
     return text.strip()
