@@ -39,7 +39,7 @@ desired_extensions = [
     '.pst', '.ost', '.ppt', '.xls', '.csv','txt','zip']
 
 # 디렉터리 처리 함수
-def process_directory(directory, fs_info, relative_path, db_path=None):
+def process_directory(directory, fs_info, relative_path, db_path, image_path):
     logging.info(f"db_path in process_directory: {db_path}")
     for directory_entry in directory:
         try:
@@ -63,14 +63,14 @@ def process_directory(directory, fs_info, relative_path, db_path=None):
 
                 if ext.lower() in desired_extensions:
                     logging.info(f"Found file: {os.path.join(relative_path, file_name)}")
-                    extract_file(directory_entry, fs_info, file_name, relative_path, db_path)
+                    extract_file(directory_entry, fs_info, file_name, relative_path, db_path, image_path)
 
         except Exception as e:
             logging.error(f"Error occurred while processing directory: {e}")
             continue
 
 # 파일 추출 함수
-def extract_file(directory_entry, fs_info, file_name, relative_path, db_path):
+def extract_file(directory_entry, fs_info, file_name, relative_path, db_path,image_path):
     try:
         file_object = fs_info.open_meta(inode=directory_entry.info.meta.addr)
         file_data = file_object.read_random(0, file_object.info.meta.size)
@@ -137,7 +137,7 @@ def extract_file(directory_entry, fs_info, file_name, relative_path, db_path):
 
             blob_data = sqlite3.Binary(file_data)
 
-            file_info = (os.path.join(relative_path, file_name), hash_value, file_text, str(m_time), str(a_time), str(c_time))
+            file_info = (image_path+"\\"+os.path.join(relative_path, file_name), hash_value, file_text, str(m_time), str(a_time), str(c_time))
             
             parsing.save_metadata_and_blob_to_db(conn, file_info, blob_data)
             conn.close()
@@ -176,7 +176,7 @@ def process_dd(image_path, parsing_db_path):
         directory = fs_info.open_dir(path="/")
 
         db_path = parsing_db_path  # db_path 정의
-        process_directory(directory, fs_info, "", db_path=db_path)  # db_path 전달
+        process_directory(directory, fs_info, "", db_path, image_path)  # db_path 전달
 
         conn.close()
         logging.info("All files processed.")

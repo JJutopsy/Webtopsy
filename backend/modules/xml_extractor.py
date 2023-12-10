@@ -43,7 +43,7 @@ def save_metadata(conn, filename, metadata):
     cursor.execute("SELECT * FROM documentmetadata WHERE filename = ?", (filename,))
     row = cursor.fetchone()
 
-    if row is None:
+    if row is None and metadata:
         columns = '", "'.join(metadata.keys())
         placeholders = ', '.join('?' * len(metadata))
         sql = f'INSERT INTO documentmetadata ("filename", "{columns}") VALUES (?, {placeholders})'
@@ -88,7 +88,6 @@ def process_files(db_path):
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         skipped_files = []
-
         cursor.execute("SELECT id, file_path, blob_data FROM files")
         rows = cursor.fetchall()
         for row in rows:
