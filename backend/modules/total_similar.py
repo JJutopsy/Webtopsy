@@ -67,9 +67,6 @@ def calculate_tag_matching_ratio(db_path, key_file_id):
 
     return matching_ratios
 
-
-
-
 def calculate_metadata_matching_ratio(db_path, key_file_id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -85,7 +82,11 @@ def calculate_metadata_matching_ratio(db_path, key_file_id):
     for column in columns:
         try:
             cursor.execute(f"SELECT {column} FROM documentmetadata WHERE filename = ?", (keyfile_name,))
-            keyfile_metadata.append(cursor.fetchone()[0])
+            result = cursor.fetchone()
+            if result is not None:
+                keyfile_metadata.append(result[0])
+            else:
+             keyfile_metadata.append(None)
         except sqlite3.OperationalError:
             keyfile_metadata.append(None)
 
@@ -117,10 +118,13 @@ def calculate_media_match_rate(db_path, key_file_id):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
-
     # 'MediaFiles' 테이블에서 'SourceFileName'이 파일명과 일치하는 레코드의 해시 값 가져오기
     c.execute(f"SELECT SHA256Hash FROM MediaFiles WHERE DocumentID='{key_file_id}'")
     key_file_hashes = [row[0] for row in c.fetchall()]
+
+    # 키 파일의 해시가 없는 경우, 빈 리스트 반환
+    if not key_file_hashes:
+        return []
 
     # 키 파일을 제외한 각 파일에 대해 일치율 계산
     c.execute(f"SELECT DISTINCT id, file_path FROM files WHERE id<>{key_file_id}")
@@ -128,13 +132,12 @@ def calculate_media_match_rate(db_path, key_file_id):
 
     media_match_rates = []
     for file_id, file_path in other_files:
-        file_name = os.path.basename(file_path)
-        c.execute(f"SELECT SHA256Hash FROM MediaFiles WHERE DocumentID='{key_file_id}'")
+        c.execute(f"SELECT SHA256Hash FROM MediaFiles WHERE DocumentID='{file_id}'")
         other_file_hashes = [row[0] for row in c.fetchall()]
 
         # 일치하는 해시 값의 개수 계산
         matching_hashes = set(key_file_hashes) & set(other_file_hashes)
-        match_rate = len(matching_hashes) / len(key_file_hashes) * 100
+        match_rate = (len(matching_hashes) / len(key_file_hashes)) * 100 if key_file_hashes else 0
 
         media_match_rates.append((file_id, match_rate))
 
@@ -166,11 +169,10 @@ def calculate_final_similarity(db_path, key_file_id):
                 if row:  # 파일명이 존재하는 경우에만 결과에 추가합니다.
                     temp_ratios[file_id] = {'file_id': file_id, 'filename': row[0], 'ratio': ratio * ratio_weight}
 
-    # 파일별 일치율의 평균을 계산하여 결과에 추가합니다.
+    # 파일별 일치율을 계산하여 결과에 추가합니다.
     for file_id, data in temp_ratios.items():
         data['ratio'] = round(data['ratio'], 2)  # 유사도 점수를 소수점 두 자리까지 반올림합니다.
-        if data['ratio'] >= 50:  # 유사도가 50 이상인 파일만 최종 결과에 추가합니다.
-            final_ratios.append(data)
+        final_ratios.append(data)
 
     conn.close()
 
