@@ -164,7 +164,7 @@ def calculate_final_similarity(db_path, key_file_id):
                 cursor.execute("SELECT filename FROM documentmetadata WHERE file_id=?", (file_id,))
                 row = cursor.fetchone()
                 if row:  # 파일명이 존재하는 경우에만 결과에 추가합니다.
-                    temp_ratios[file_id] = {'file_id': file_id, 'filename': row[0], 'ratio': ratio * ratio_weight}
+                    temp_ratios[file_id] = {'id': file_id, 'filename': row[0], 'ratio': ratio * ratio_weight}
 
     # 파일별 일치율의 평균을 계산하여 결과에 추가합니다.
     for file_id, data in temp_ratios.items():

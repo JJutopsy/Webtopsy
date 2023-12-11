@@ -8,14 +8,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 import json
 from modules import total_similar
-
+from dotenv import load_dotenv
 
 similarity_bp = Blueprint('similarity', __name__)
 
 @similarity_bp.route('/similarity', methods=['POST'])   
 def similarity_analysis():
+    load_dotenv()
     data = request.json
-    db_path = data['parsingDBpath']
+    db_path = os.environ.get("REACT_APP_HOME")+"/"+data.get('parsingDBpath')
     key_document_id = data['key_document_id']
     with sqlite3.connect(db_path) as conn:
         conn.row_factory = sqlite3.Row
@@ -69,7 +70,7 @@ def find_similar_media(conn, key_document_id):
         match_ratio = f"{info['matched_count']}/{key_media_count}"  # 일치 비율 계산
         target_media_count = total_media_count.get(doc_id, 0)  # 대상 파일 미디어 전체 개수
         result.append({
-            'DocumentID': doc_id,
+            'id': doc_id,
             'TargetMediaCount': target_media_count,
             'SourceFileNames': file_names_str,
             'MatchRatio': match_ratio

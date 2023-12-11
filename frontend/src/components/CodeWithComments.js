@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, Dropdown, Tabs, Tab, Table, Badge, OverlayTrigger, Tooltip, ListGroup, Form } from 'react-bootstrap';
+import { Modal, Button, Dropdown, Tabs, Tab, Table, Badge, OverlayTrigger, Tooltip, ListGroup, Form, Spinner } from 'react-bootstrap';
 import './CodeWithComments.css';
 import { BsThreeDots } from 'react-icons/bs';
 import { useRecoilState } from 'recoil';
 import { LoginName } from '../atom/LoginName';
 import { Stack } from '@mui/material';
-const CodeWithComments = ({ code, db_path }) => {
+const CodeWithComments = ({ code, db_path, setResultSimilarity }) => {
     console.log(code)
     const [activeTab, setActiveTab] = useState('plain');
     const [User, setUser] = useRecoilState(LoginName);
@@ -18,6 +18,8 @@ const CodeWithComments = ({ code, db_path }) => {
     const [comment, setComment] = useState("");
     const [comments, setComments] = useState([]);
     const [fetchedLines, setFetchedLines] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+
     const handleClose = () => setShow(false);
     const fetchComments = async () => {
         try {
@@ -73,6 +75,27 @@ const CodeWithComments = ({ code, db_path }) => {
         // 스크롤을 해당 라인으로 이동시킵니다.
         // scroll.scrollTo(lineNumber * lineHeight); // lineHeight는 라인의 높이를 나타내는 값입니다.
     };
+    const handleFind = () => {
+        setIsLoading(true);
+        setResultSimilarity({});
+        const data = {
+            parsingDBpath: db_path,
+            key_document_id: code.id
+        }
+        fetch('http://localhost:5000/similarity', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        }).then(response => response.json()).then(data => {
+            setResultSimilarity(data);
+            setIsLoading(false);
+        }).catch((error) => {
+            console.log('Error', error);
+            setIsLoading(false);
+        })
+    }
     const submitComment = () => {
         const newComment = {
             post_id: code.id,
@@ -92,7 +115,7 @@ const CodeWithComments = ({ code, db_path }) => {
             console.log('Success:', data);
         }).catch((error) => {
             console.error('Error:', error);
-            });
+        });
         setComment("");
         fetchComments();
     }
@@ -179,6 +202,10 @@ const CodeWithComments = ({ code, db_path }) => {
                                 </th>
                             </tr>
                             <tr>
+                                <th>파일 출처</th>
+                                <th>{code.owner[0]} : {code.owner[1]}</th>
+                            </tr>
+                            <tr>
                                 <th>
                                     <pre>생성 시간</pre>
                                 </th>
@@ -258,7 +285,26 @@ const CodeWithComments = ({ code, db_path }) => {
                     <hr></hr>
                     <Stack direction='row' spacing={1}>
                         <Button variant='primary'>이 문서 다운로드</Button>
-                        <Button variant='primary'>동일 양식 문서 추적</Button>
+                        <Button
+                            variant='primary'
+                            onClick={handleFind}
+                            disabled={!['.docx', '.xlsx', '.pptx'].includes(code.file_path.slice(-5)) || isLoading }
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Spinner
+                                        as="span"
+                                        animation="border"
+                                        size="sm"
+                                        role="status"
+                                        aria-hidden="true"
+                                    />
+                                    　검색 중...
+                                </>
+                            ) : (
+                                '유사 문서 추적'
+                            )}
+                        </Button>
                     </Stack>
 
                 </Tab>

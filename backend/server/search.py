@@ -15,7 +15,7 @@ def search_id(file_id):
     load_dotenv()
 
     data = request.get_json()
-    parsingDBpath = os.environ.get("REACT_APP_HOME") + "/" + data.get('parsingDBpath')
+    parsingDBpath = os.environ.get("REACT_APP_HOME") + "/" + data.get('db_path')
 
     if not os.path.exists(parsingDBpath):
         return '데이터베이스 파일을 찾을 수 없습니다.', 404
@@ -96,7 +96,7 @@ def search_Email_keyword():
     load_dotenv()
 
     data = request.get_json()
-    parsingDBpath = data.get('parsingDBpath')
+    parsingDBpath = os.environ.get("REACT_APP_HOME")+"/"+data.get('parsingDBpath')
     keyword = data.get('keyword')
 
     if not os.path.exists(parsingDBpath):
@@ -115,6 +115,6 @@ def search_Email_keyword():
         return '검색 결과가 없습니다.', 404
     result_list = []
     for row in results:
-            result_list.append({'subject': row['subject'], 'date': row['date'], 'sender':row['sender'], 'receiver':row['receiver'], 'body':row['body']})
+            result_list.append({'subject': row['subject'], 'date': row['date'], 'sender':row['sender'], 'receiver':row['receiver'], 'body':row['body'], 'tag':row['tag'], 'NNP':row['NNP']})
 
     return jsonify(result_list)
