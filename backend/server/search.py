@@ -115,6 +115,6 @@ def search_Email_keyword():
         return '검색 결과가 없습니다.', 404
     result_list = []
     for row in results:
-            result_list.append({'subject': row['subject'], 'date': row['date'], 'sender':row['sender'], 'receiver':row['receiver'], 'body':row['body'], 'tag':row['tag'], 'NNP':row['NNP']})
+            result_list.append({'subject': row['subject'], 'date': row['date'], 'sender':row['sender'], 'receiver':row['receiver'], 'body':row['body'], 'tag':row['tag'], 'NNP':row['NNP'], 'file_path':row['save_location'], 'id':row['id']})
 
     return jsonify(result_list)

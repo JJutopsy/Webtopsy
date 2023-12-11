@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { Badge, Tab, Tabs } from 'react-bootstrap';
 import { FaArrowRight } from 'react-icons/fa';
+import CodeWithEmails from './CodeWithEmails';
 
 const EmailResult = ({ rows, db_path }) => {
     const [selectedRow, setSelectedRow] = useState(null);
@@ -59,7 +60,7 @@ const EmailResult = ({ rows, db_path }) => {
             </Box>
             {selectedText && (
                 <Box flex={1} style={{ maxHeight: '80vh', overflowY: 'scroll' }}>
-                   
+                   <CodeWithEmails code={selectedText} db_path={db_path} />
                 </Box>
             )}
         </Box>

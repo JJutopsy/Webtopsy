@@ -85,7 +85,18 @@ def init_tables_db(db_path):
     )
     ''')
     cursor.execute('''
+        CREATE TABLE IF NOT EXISTS emlComments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id INTEGER,
+        username TEXT NOT NULL,
+        context TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        type TEXT NOT NULL
+    )
+    ''')
+    cursor.execute('''
     CREATE TABLE IF NOT EXISTS emlEmails (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         save_location TEXT,
         subject TEXT,
         date TEXT,     
@@ -104,6 +115,7 @@ def init_tables_db(db_path):
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS emlAttachments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         save_location TEXT,
         filename TEXT,
         hash TEXT,
@@ -116,6 +128,7 @@ def init_tables_db(db_path):
     
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS pstAttachments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         save_location TEXT,
         subject TEXT,
         filename TEXT,
@@ -130,6 +143,7 @@ def init_tables_db(db_path):
     
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS emlPerson (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         emlPerson TEXT,
         relatedPerson TEXT,
         seCount INTEGER,
