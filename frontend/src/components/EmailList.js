@@ -268,7 +268,7 @@ function EmailList() {
           <Col md={10}>
             <div className="searchResult">
               {/* <Result rows={filteredRows} db_path={db_path} /> */}
-              <EmailResult row={filteredRows} db_path={db_path}/>
+              <EmailResult rows={filteredRows} db_path={db_path}/>
             </div>
           </Col>
         </div>

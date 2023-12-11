@@ -6,7 +6,6 @@ import { useRecoilState } from 'recoil';
 import { LoginName } from '../atom/LoginName';
 import { Stack } from '@mui/material';
 const CodeWithComments = ({ code, db_path, setResultSimilarity }) => {
-    console.log(code)
     const [activeTab, setActiveTab] = useState('plain');
     const [User, setUser] = useRecoilState(LoginName);
     const [show, setShow] = useState(false);

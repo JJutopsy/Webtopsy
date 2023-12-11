@@ -76,7 +76,7 @@ export default function Viewer() {
             </Box>
           </Tab>
           <Tab eventKey="second" title="Search & Review">
-              <PostList />
+            <PostList />
           </Tab>
           <Tab eventKey="third" title="Email Investigation">
             <EmailList/>
