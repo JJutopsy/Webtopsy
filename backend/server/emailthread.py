@@ -8,7 +8,7 @@ emlthread_bp = Blueprint('emlthread', __name__)
 @emlthread_bp.route('/emlthread', methods=['POST'])
 def emlthread():
     data = request.json
-    db_path = data.get('db_path')
+    db_path = data.get('parsingDBpath')
     get_subject = data.get('email_subject')
 
     if not db_path or not get_subject:
@@ -52,12 +52,6 @@ class EmailDatabaseReader:
             references = msg.get("References", "").split()
             in_reply_to = msg.get("In-Reply-To", "").split()
 
-            # 추가: 기준 이메일의 정보 출력
-            print("기준 이메일의 Message-ID:", message_id)
-            print("기준 이메일의 References:", references)
-            print("기준 이메일의 In-Reply-To:", in_reply_to)
-            print("\n")
-
             # 모든 관련 이메일 찾기
             related_emails = self.find_related_emails(message_id, references, in_reply_to)
             return related_emails
@@ -67,25 +61,36 @@ class EmailDatabaseReader:
 
     def find_related_emails(self, message_id, references, in_reply_to):
         found_emails = []
+        seen_message_ids = set()  # 이미 처리된 이메일의 message_id를 저장하는 집합
 
-        query = "SELECT subject, sender, receiver, date, blob_data FROM emlEmails"
+        query = "SELECT subject, sender, receiver, date, body, blob_data FROM emlEmails"
         for row in self.cursor.execute(query):
-            subject, sender, receiver, date, blob_data = row
-            if blob_data is None:
+            subject, sender, receiver, date, body, blob_data = row
+
+            if body is None or blob_data is None:
                 continue
-            other_msg = BytesParser(policy=policy.default).parsebytes(blob_data)
 
-            other_message_id = other_msg.get("Message-ID")
-            other_references = other_msg.get("References", "").split()
-            other_in_reply_to = other_msg.get("In-Reply-To", "").split()
+            # blob_data에서 이메일 정보 파싱
+            msg = BytesParser(policy=policy.default).parsebytes(blob_data)
+            other_message_id = msg.get("Message-ID")
+            other_references = msg.get("References", "").split()
+            other_in_reply_to = msg.get("In-Reply-To", "").split()
 
+            # 중복 제거 확인
+            if other_message_id in seen_message_ids:
+                continue
+            seen_message_ids.add(other_message_id)
+
+            # 관련 이메일 확인 로직
             match_type = None
             if other_message_id == message_id or \
-                any(msg_id == other_message_id for msg_id in references + in_reply_to):
+                other_message_id in references or \
+                other_message_id in in_reply_to or \
+                any(ref in other_references or ref in other_in_reply_to for ref in references + in_reply_to):
                 match_type = 'Direct Match'
             elif message_id in other_references or \
                 message_id in other_in_reply_to or \
-                any(ref in other_references or ref in other_in_reply_to for ref in references + in_reply_to):
+                any(ref in references or ref in in_reply_to for ref in other_references + other_in_reply_to):
                 match_type = 'Related Match'
 
             if match_type:
@@ -94,9 +99,10 @@ class EmailDatabaseReader:
                     "subject": subject,
                     "sender": sender,
                     "receiver": receiver,
-                    "match_type": match_type
+                    "body": body,  # 이메일 본문을 결과에 포함
+                    "match_type": match_type  # 관련성 유형에 따라 설정
                 }
                 found_emails.append(email_data)
-        sorted_emails = sorted(found_emails, key=lambda x: x['date'])
 
+        sorted_emails = sorted(found_emails, key=lambda x: x['date'])
         return sorted_emails

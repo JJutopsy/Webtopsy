@@ -10,6 +10,7 @@ search_bp = Blueprint('search', __name__)
 def highlight_keywords(text, keyword):
     highlighted = re.sub(f'({keyword})', r'<b>\1</b>', text, flags=re.IGNORECASE)
     return highlighted
+
 @search_bp.route('/keyword/<int:file_id>', methods=['POST'])
 def search_id(file_id):
     load_dotenv()
@@ -31,7 +32,7 @@ def search_id(file_id):
 
     if not result:
         return '검색 결과가 없습니다.', 404
-
+    result_dict = {}
     row = dict(result)
     if row['tag'] and row['NNP']:
         m_time = datetime.strptime(row['m_time'], "%a %b %d %H:%M:%S %Y").strftime("%Y-%m-%d %H:%M")
@@ -49,10 +50,9 @@ def search_id(file_id):
         'm_time': m_time,
         'a_time': a_time,
         'c_time': c_time
-        }
-
-    return jsonify(result_dict)
-
+            }
+        return jsonify(result_dict)
+    return 'TAG 또는 NNP가 없습니다.',400
 @search_bp.route('/keyword', methods=['POST'])
 def search_keyword():
     load_dotenv()

@@ -185,6 +185,7 @@ const CodeWithComments = ({ code, db_path, setResultSimilarity }) => {
 
                     </div>
                 </Tab>
+               
                 <Tab eventKey="metadata" title="메타데이터 정보" onClick={() => setActiveTab("metadata")}>
                     <Table striped bordered hover style={{ width: "50wv" }}>
                         <thead>

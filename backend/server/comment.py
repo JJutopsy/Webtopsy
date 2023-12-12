@@ -159,7 +159,7 @@ def post_eml_comment():
 
 #     return jsonify('Comment deleted successfully', 200)
 
-@comment_bp.route('/comments/email/<int:post_id>', methods=['POST'])
+@comment_bp.route('/comment/email/<int:post_id>', methods=['POST'])
 def get_eml_comments(post_id):
     data = request.get_json()
     db_path = data.get('db_path')

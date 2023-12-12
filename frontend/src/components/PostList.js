@@ -152,7 +152,7 @@ function PostList() {
       });
 
 
-      const owner = item.owner.split(',').map(e => e.trim());
+      const owner = item.owner && item.owner.split(',').map(e => e.trim());
 
       return {
         ...item,

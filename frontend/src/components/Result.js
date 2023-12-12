@@ -19,90 +19,98 @@ const Result = ({ rows, db_path }) => {
         const { identical_documents, similar_information_docs, similar_media } = result;
       
         const fetchDocument = async (id) => {
-          const req = { db_path: db_path }
-          const response = await fetch(`http://localhost:5000/keyword/${id}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            }, body: JSON.stringify(req)
-          });
-          let data = await response.json();
-      
-          const getRandomColor = () => {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-              color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-          };
-      
-          let tagDict = {};
-          let nameDict = {};
-      
-          // Process single data item
-          const tags = data.tag.split(',').filter(e => e.trim().length > 1).map(tag => {
-            if (!tagDict[tag]) {
-              tagDict[tag] = {
-                color: getRandomColor(),
-                count: 1
+            const req = { db_path: db_path }
+            const response = await fetch(`http://localhost:5000/keyword/${id}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              }, body: JSON.stringify(req)
+            });
+            let stat = await response.status;
+            if (stat===200){
+              let data = await response.json();
+            
+              const getRandomColor = () => {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                  color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
               };
-            } else {
-              tagDict[tag].count += 1;
+            
+              let tagDict = {};
+              let nameDict = {};
+            
+              // Process single data item
+              const tags = data.tag.split(',').filter(e => e.trim().length > 1).map(tag => {
+                if (!tagDict[tag]) {
+                  tagDict[tag] = {
+                    color: getRandomColor(),
+                    count: 1
+                  };
+                } else {
+                  tagDict[tag].count += 1;
+                }
+                return {
+                  tag,
+                  color: tagDict[tag].color,
+                  count: tagDict[tag].count
+                };
+              });
+              
+              const names = data.NNP.split(',').filter(e => {
+                const name = e.replace("_인명", "").trim();
+                return e.includes("_인명") && /^[\uAC00-\uD7A3]*$/.test(name) && name.length >= 2 && name.length <= 3
+              }).map(name => {
+                name = name.replace("_인명", "").trim();
+                if (!nameDict[name]) {
+                  nameDict[name] = {
+                    color: getRandomColor(),
+                    count: 1
+                  };
+                } else {
+                  nameDict[name].count += 1;
+                }
+                return {
+                  name,
+                  color: nameDict[name].color,
+                  count: nameDict[name].count
+                };
+              });
+            
+              const owner = data.owner.split(',').map(e => e.trim());
+            
+              data = {
+                ...data,
+                tags,
+                names,
+                owner
+              };
+            
+              return data;
             }
-            return {
-              tag,
-              color: tagDict[tag].color,
-              count: tagDict[tag].count
-            };
-          });
+            else {
+              return null; // 상태 코드가 200이 아닌 경우 null 반환
+            }
+          };
           
-          const names = data.NNP.split(',').filter(e => {
-            const name = e.replace("_인명", "").trim();
-            return e.includes("_인명") && /^[\uAC00-\uD7A3]*$/.test(name) && name.length >= 2 && name.length <= 3
-          }).map(name => {
-            name = name.replace("_인명", "").trim();
-            if (!nameDict[name]) {
-              nameDict[name] = {
-                color: getRandomColor(),
-                count: 1
-              };
-            } else {
-              nameDict[name].count += 1;
-            }
-            return {
-              name,
-              color: nameDict[name].color,
-              count: nameDict[name].count
-            };
-          });
-      
-          const owner = data.owner.split(',').map(e => e.trim());
-      
-          data = {
-            ...data,
-            tags,
-            names,
-            owner
-          };
-      
-          return data;
-        };
-      
-        if (identical_documents) {
-          const hashSim = await Promise.all(identical_documents.map((doc) => fetchDocument(doc.id)));
-          setHashSim(hashSim);
-        }
-      
-        if (similar_media) {
-          const mediaSim = await Promise.all(similar_media.map((doc) => fetchDocument(doc.id)));
-          setMediaSim(mediaSim);
-        }
-      
-        if (similar_information_docs) {
-          const totalSim = await Promise.all(similar_information_docs.map((doc) => fetchDocument(doc.id)));
-          setTotalSim(totalSim);
-        }
+          // 아래 부분에서 null 값 제외
+          if (identical_documents) {
+            const hashSim = (await Promise.all(identical_documents.map((doc) => fetchDocument(doc.id)))).filter(i => i);
+            setHashSim(hashSim);
+          }
+          
+          if (similar_media) {
+            const mediaSim = (await Promise.all(similar_media.map((doc) => fetchDocument(doc.id)))).filter(i => i);
+            setMediaSim(mediaSim);
+          }
+          
+          if (similar_information_docs) {
+            const totalSim = (await Promise.all(similar_information_docs.map((doc) => fetchDocument(doc.id)))).filter(i => i);
+            setTotalSim(totalSim);
+          }
+          
       };
       
     useEffect(() => {
@@ -204,7 +212,8 @@ const Result = ({ rows, db_path }) => {
                                 {totalSim.map((row, index) => (
                                     <article key={index} onClick={() => handleClick(row)}>
                                         <header>
-                                            <Typography variant="h6" style={selectedRow === row ? { fontWeight: 'bold' } : {}}><Badge>{row.owner[1]}</Badge>{row.file_path.replace(row.owner[0], "")}</Typography>
+                                             <Typography variant="h6" style={selectedRow === row ? { fontWeight: 'bold' } : {}}><Badge>{row.owner[1]}</Badge>{row.file_path.replace(row.owner[0], "")}</Typography>
+                                          
                                         </header>
                                         <section>
                                             <div style={{ display: 'flex' }}>

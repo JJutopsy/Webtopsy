@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Button, Dropdown, Tabs, Tab, Table, Badge, OverlayTrigger, Tooltip, ListGroup, Form, Spinner } from 'react-bootstrap';
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
+
 import './CodeWithComments.css';
 import { BsThreeDots } from 'react-icons/bs';
 import { useRecoilState } from 'recoil';
 import { LoginName } from '../atom/LoginName';
-import { Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
     const [activeTab, setActiveTab] = useState('plain');
     const [User, setUser] = useRecoilState(LoginName);
@@ -18,6 +21,7 @@ const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
     const [comments, setComments] = useState([]);
     const [fetchedLines, setFetchedLines] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [thread, setThread] = useState({});
 
     const handleClose = () => setShow(false);
     const fetchComments = async () => {
@@ -44,6 +48,7 @@ const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
 
     useEffect(() => {
         fetchComments();
+        handleFind();
     }, [code.id, db_path, activeTab]);
     const isLineHighlighted = (lineNumber) => {
         return comments.some(comment => comment.type === lineNumber);
@@ -76,19 +81,19 @@ const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
     };
     const handleFind = () => {
         setIsLoading(true);
-        setResultSimilarity({});
+        setThread({});
         const data = {
             parsingDBpath: db_path,
-            key_document_id: code.id
+            email_subject: code.subject
         }
-        fetch('http://localhost:5000/similarity', {
+        fetch('http://localhost:5000/emlthread', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data)
         }).then(response => response.json()).then(data => {
-            setResultSimilarity(data);
+            setThread(data);
             setIsLoading(false);
         }).catch((error) => {
             console.log('Error', error);
@@ -185,8 +190,75 @@ const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
 
                     </div>
                 </Tab>
+                <Tab eventKey='info' title="파일 정보">
+                    <Table striped bordered hover style={{ width: "50wv" }}>
+                        <thead>
+                            <tr>
+                                <th>메타데이터</th>
+                                <th>값</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>파일 경로</th>
+                                <th>
+                                    {code.file_path}
+
+                                </th>
+                            </tr>
+                        </tbody>
+                    </Table>
+                </Tab>
                 <Tab eventKey="metadata" title="이메일 스레딩" onClick={() => setActiveTab("metadata")}>
-                   
+                    {/* <div style={{ position: 'block', width: '100%' }}>
+                        <ToastContainer
+                            className="p-3"
+                            style={{ zIndex: 0, position: 'block' }}  // position을 'relative'로 변경
+                        >
+                            <Stack direction={'column'} spacing={1} style={{width:"100%"}}>
+                    
+                            {thread.related_emails && thread.related_emails.map((email, i) => (
+                                <Stack justifyContent='flex-end'>
+                                    <Toast key={i} style={{ float: code.sender === email.sender ? 'right' : 'left' }}>
+                                        <Toast.Header closeButton={false}>
+                                            <img
+                                                src="holder.js/20x20?text=%20"
+                                                className="rounded me-2"
+                                                alt=""
+                                            />
+                                            <strong className="me-auto">{email.sender}</strong>
+                                            <small>{email.date}</small>
+                                        </Toast.Header>
+                                        <Toast.Body>{email.subject}<hr />{email.body}</Toast.Body>
+                                    </Toast>
+                                </Stack>
+                            ))}
+                               </Stack>
+                        </ToastContainer>
+                    </div> */}
+                    <Box width={'100%'}>
+                        <Stack direction={'column'} spacing={1}>
+                        {thread.related_emails && thread.related_emails.map((email, i) => (
+                            <Box>
+                                <Stack direction={'row'} justifyContent={code.sender === email.sender ? 'flex-end' : 'flex-start'}>
+                                    <Toast key={1} maxWidth='300px'>
+                                        <Toast.Header closeButton={false}>
+                                            <img
+                                                src="holder.js/20x20?text=%20"
+                                                className="rounded me-2"
+                                                alt=""
+                                            />
+                                            <strong className="me-auto">{email.sender}</strong>
+                                            <small>{email.date}</small>
+                                        </Toast.Header>
+                                        <Toast.Body>{email.subject}<hr />{email.body}</Toast.Body>
+                                    </Toast>
+                                </Stack>
+                            </Box>
+                             ))}
+                        
+                        </Stack>
+                    </Box>
                 </Tab>
             </Tabs>
 

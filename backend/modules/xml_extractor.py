@@ -26,36 +26,39 @@ def parse_metadata(blob_data, xml_file):
         print("Unable to parse metadata")
         return {}
 
-# 데이터베이스에 메타데이터를 저장하는 함수
-def save_metadata(conn, filename, metadata):
+def save_metadata(conn, file_id, filename, metadata):
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS documentmetadata (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT);")
-    conn.commit()
 
-    cursor.execute("PRAGMA table_info(documentmetadata);")
-    existing_columns = {info[1] for info in cursor.fetchall()}
+    # 필터링된 메타데이터 생성 (테이블에 존재하는 컬럼만 포함)
+    valid_columns = [
+        "Template", "TotalTime", "Pages", "Words", "Characters", 
+        "Application", "DocSecurity", "Lines", "Paragraphs", "ScaleCrop", 
+        "HeadingPairs", "TitlesOfParts", "Company", "LinksUpToDate", 
+        "CharactersWithSpaces", "SharedDoc", "HyperlinksChanged", "AppVersion", 
+        "title", "subject", "creator", "keywords", "description", 
+        "lastModifiedBy", "revision", "lastPrinted", "created", 
+        "modified", "PresentationFormat", "Slides", "Notes", 
+        "HiddenSlides", "MMClips", "category", "language", "HLinks"
+    ]
+    filtered_metadata = {k: v for k, v in metadata.items() if k in valid_columns and v is not None}
 
-    for key in metadata.keys():
-        if key not in existing_columns:
-            cursor.execute(f'ALTER TABLE documentmetadata ADD COLUMN "{key}" TEXT;')
-            conn.commit()
-
-    cursor.execute("SELECT * FROM documentmetadata WHERE filename = ?", (filename,))
+    cursor.execute("SELECT * FROM documentmetadata WHERE file_id = ?", (file_id,))
     row = cursor.fetchone()
 
-    if row is None and metadata:
-        columns = '", "'.join(metadata.keys())
-        placeholders = ', '.join('?' * len(metadata))
-        sql = f'INSERT INTO documentmetadata ("filename", "{columns}") VALUES (?, {placeholders})'
-        values = [filename] + list(metadata.values())
+    if row is None and filtered_metadata:
+        columns = '", "'.join(filtered_metadata.keys())
+        placeholders = ', '.join(['?'] * len(filtered_metadata))
+        sql = f'INSERT INTO documentmetadata (file_id, filename, "{columns}") VALUES (?, ?, {placeholders})'
+        values = [file_id, filename] + list(filtered_metadata.values())
         cursor.execute(sql, values)
-        conn.commit()
-    else:
-        for key, value in metadata.items():
-            if row[key] is None:
-                sql = f'UPDATE documentmetadata SET "{key}" = ? WHERE filename = ?'
-                cursor.execute(sql, (value, filename))
-                conn.commit()
+    elif row:
+        for key, value in filtered_metadata.items():
+            if key not in row or row[key] is None:
+                sql = f'UPDATE documentmetadata SET "{key}" = ? WHERE file_id = ?'
+                cursor.execute(sql, (value, file_id))
+    conn.commit()
+
+
 
 # 미디어 파일 정보를 MediaFiles 테이블에 삽입하는 함수
 def insert_media_file(document_id, original_file_name, file_data, source_file_name, cursor):
@@ -98,7 +101,7 @@ def process_files(db_path):
             if is_ooxml(file_path):
                 for xml_file in ['docProps/app.xml', 'docProps/core.xml']:
                     metadata = parse_metadata(blob_data, xml_file)
-                    save_metadata(conn, os.path.basename(file_path), metadata)
+                    save_metadata(conn, document_id,os.path.basename(file_path), metadata)
                 extract_media_from_blob(document_id, blob_data, source_file_name, cursor, skipped_files)
 
     return skipped_files

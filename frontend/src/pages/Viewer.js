@@ -15,7 +15,7 @@ import DashTable from "../components/DashTable";
 import EmailList from "../components/EmailList";
 import { useRecoilState } from "recoil";
 import { LoginName } from "../atom/LoginName";
-
+import { Link } from 'react-router-dom';
 
 export default function Viewer() {
   const [User, setUser] = useRecoilState(LoginName);
@@ -30,7 +30,7 @@ export default function Viewer() {
             <div style={{ display: 'flex' }}>
               <Stack direction={'row'} spacing={1}>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px', fontWeight: "bold" }}>
-                  Webtopsy
+                  <Link to="/case" style={{ color: 'inherit', textDecoration: 'none' }}>Webtopsy</Link>
                 </Typography>
 
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '50px' }}>
@@ -70,16 +70,16 @@ export default function Viewer() {
           }}
         >
           <Tab eventKey="first" title="Dashbaord" >
-            <Box sx={{ backgroundColor: "#E9EDF5"}} >
+            <Box sx={{ backgroundColor: "#E9EDF5" }} >
               <br></br>
-              <DashTable/>
+              <DashTable />
             </Box>
           </Tab>
           <Tab eventKey="second" title="Search & Review">
             <PostList />
           </Tab>
           <Tab eventKey="third" title="Email Investigation">
-            <EmailList/>
+            <EmailList />
           </Tab>
         </Tabs>
       </div>
