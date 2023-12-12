@@ -74,11 +74,26 @@ const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
     const handleCommentChange = (e) => {
         setComment(e.target.value);
     };
-    const handleLineClick = (lineNumber) => {
-        setActiveTab('plain');
-        // 스크롤을 해당 라인으로 이동시킵니다.
-        // scroll.scrollTo(lineNumber * lineHeight); // lineHeight는 라인의 높이를 나타내는 값입니다.
-    };
+    const downloadBase64File = (base64Data, filename) => {
+        const byteCharacters = atob(base64Data);
+        const byteArrays = [];
+
+        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+            const slice = byteCharacters.slice(offset, offset + 512);
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+
+        const blob = new Blob(byteArrays);
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
     const handleFind = () => {
         setIsLoading(true);
         setThread({});
@@ -210,53 +225,33 @@ const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
                     </Table>
                 </Tab>
                 <Tab eventKey="metadata" title="이메일 스레딩" onClick={() => setActiveTab("metadata")}>
-                    {/* <div style={{ position: 'block', width: '100%' }}>
-                        <ToastContainer
-                            className="p-3"
-                            style={{ zIndex: 0, position: 'block' }}  // position을 'relative'로 변경
-                        >
-                            <Stack direction={'column'} spacing={1} style={{width:"100%"}}>
-                    
-                            {thread.related_emails && thread.related_emails.map((email, i) => (
-                                <Stack justifyContent='flex-end'>
-                                    <Toast key={i} style={{ float: code.sender === email.sender ? 'right' : 'left' }}>
-                                        <Toast.Header closeButton={false}>
-                                            <img
-                                                src="holder.js/20x20?text=%20"
-                                                className="rounded me-2"
-                                                alt=""
-                                            />
-                                            <strong className="me-auto">{email.sender}</strong>
-                                            <small>{email.date}</small>
-                                        </Toast.Header>
-                                        <Toast.Body>{email.subject}<hr />{email.body}</Toast.Body>
-                                    </Toast>
-                                </Stack>
-                            ))}
-                               </Stack>
-                        </ToastContainer>
-                    </div> */}
                     <Box width={'100%'}>
                         <Stack direction={'column'} spacing={1}>
-                        {thread.related_emails && thread.related_emails.map((email, i) => (
-                            <Box>
-                                <Stack direction={'row'} justifyContent={code.sender === email.sender ? 'flex-end' : 'flex-start'}>
-                                    <Toast key={1} maxWidth='300px'>
-                                        <Toast.Header closeButton={false}>
-                                            <img
-                                                src="holder.js/20x20?text=%20"
-                                                className="rounded me-2"
-                                                alt=""
-                                            />
-                                            <strong className="me-auto">{email.sender}</strong>
-                                            <small>{email.date}</small>
-                                        </Toast.Header>
-                                        <Toast.Body>{email.subject}<hr />{email.body}</Toast.Body>
-                                    </Toast>
-                                </Stack>
-                            </Box>
-                             ))}
-                        
+                            {thread.related_emails && thread.related_emails.map((email, i) => (
+                                <Box>
+                                    <Stack direction={'row'} justifyContent={code.sender === email.sender ? 'flex-end' : 'flex-start'}>
+                                        <Toast key={1} maxWidth='300px'>
+                                            <Toast.Header closeButton={false}>
+                                                <img
+                                                    src="holder.js/20x20?text=%20"
+                                                    className="rounded me-2"
+                                                    alt=""
+                                                />
+                                                <strong className="me-auto">{email.sender}</strong>
+                                                <small>{email.date}</small>
+                                            </Toast.Header>
+                                            <Toast.Body>{email.subject}<hr />{email.body}<hr>
+                                            </hr>{email.att_file_name &&
+                                                <a onClick={() => downloadBase64File(email.att_file_data, email.att_file_name)}>
+                                                    <strong>첨부파일</strong> : {email.att_file_name}
+                                                </a>
+                                                }
+                                            </Toast.Body>
+                                        </Toast>
+                                    </Stack>
+                                </Box>
+                            ))}
+
                         </Stack>
                     </Box>
                 </Tab>

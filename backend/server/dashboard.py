@@ -11,7 +11,6 @@ def get_extension_distribution():
     # Use request.json to get the JSON data sent in the POST request
     data = request.json
     db_path = data.get('db_path')
-
     if not db_path:
         return jsonify({"error": "Missing 'db_path' parameter"}), 400
 
@@ -101,12 +100,12 @@ def get_after_hours_documents():
     connection = sqlite3.connect(db_path)
     cursor = connection.cursor()
 
-    cursor.execute("SELECT file_path, m_time FROM files WHERE strftime('%H:%M:%S', m_time) < '09:00:00' OR strftime('%H:%M:%S', m_time) > '18:00:00'")
+    cursor.execute("SELECT file_path, owner, m_time FROM files WHERE strftime('%H:%M:%S', m_time) < '09:00:00' OR strftime('%H:%M:%S', m_time) > '18:00:00'")
     results = cursor.fetchall()
 
     connection.close()
 
     # Convert the results to the desired format
-    formatted_results = [{'name': row[0], 'time': row[1]} for row in results]
+    formatted_results = [{'name': row[0], 'owner':row[1], 'time': row[2]} for row in results]
 
     return jsonify(formatted_results)

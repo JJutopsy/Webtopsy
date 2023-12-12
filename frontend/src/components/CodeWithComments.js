@@ -20,6 +20,7 @@ const CodeWithComments = ({ code, db_path, setResultSimilarity }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleClose = () => setShow(false);
+    
     const fetchComments = async () => {
         try {
             const response = await fetch(`http://localhost:5000/comments/${code.id}`, {
@@ -74,6 +75,40 @@ const CodeWithComments = ({ code, db_path, setResultSimilarity }) => {
         // 스크롤을 해당 라인으로 이동시킵니다.
         // scroll.scrollTo(lineNumber * lineHeight); // lineHeight는 라인의 높이를 나타내는 값입니다.
     };
+    const downloadBase64File = (base64Data, filename) => {
+        const byteCharacters = atob(base64Data);
+        const byteArrays = [];
+
+        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+            const slice = byteCharacters.slice(offset, offset + 512);
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+
+        const blob = new Blob(byteArrays);
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+    const handleDownload = () =>{
+        const data = {
+            parsingDBpath: db_path,
+        }
+        fetch(`http://localhost:5000/blob/${code.id}`,{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json',
+            },
+            body: JSON.stringify(data)
+        }).then(response=> response.json()).then(data=>{
+            downloadBase64File(data.blob,code.file_path.split("\\").pop());
+        })
+    }
     const handleFind = () => {
         setIsLoading(true);
         setResultSimilarity({});
@@ -284,7 +319,7 @@ const CodeWithComments = ({ code, db_path, setResultSimilarity }) => {
                     </ListGroup>
                     <hr></hr>
                     <Stack direction='row' spacing={1}>
-                        <Button variant='primary'>이 문서 다운로드</Button>
+                        <Button variant='primary' onClick={handleDownload}>이 문서 다운로드</Button>
                         <Button
                             variant='primary'
                             onClick={handleFind}

@@ -117,6 +117,7 @@ def init_tables_db(db_path):
         CREATE TABLE IF NOT EXISTS emlAttachments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         save_location TEXT,
+        subject TEXT,
         filename TEXT,
         hash TEXT,
         data BLOB,

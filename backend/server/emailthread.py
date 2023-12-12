@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 import sqlite3
 from email.parser import BytesParser
 from email import policy
+import base64
 
 emlthread_bp = Blueprint('emlthread', __name__)
 
@@ -94,13 +95,27 @@ class EmailDatabaseReader:
                 match_type = 'Related Match'
 
             if match_type:
+                # emlAttachment에서 subject를 기준으로 filename과 data를 찾습니다.
+                attachment_query = "SELECT filename, data FROM emlAttachments WHERE subject = ?"
+                self.cursor.execute(attachment_query, (subject,))
+                attachment_row = self.cursor.fetchone()
+
+                if attachment_row is not None:
+                    att_file_name, att_file_data = attachment_row
+                    if att_file_data is not None:
+                        att_file_data = base64.b64encode(att_file_data).decode()
+                else:
+                    att_file_name, att_file_data = "", ""
+                print(att_file_name)
                 email_data = {
                     "date": date,
                     "subject": subject,
                     "sender": sender,
                     "receiver": receiver,
-                    "body": body,  # 이메일 본문을 결과에 포함
-                    "match_type": match_type  # 관련성 유형에 따라 설정
+                    "body": body, 
+                    "match_type": match_type,
+                    "att_file_name": att_file_name,
+                    "att_file_data": att_file_data
                 }
                 found_emails.append(email_data)
 

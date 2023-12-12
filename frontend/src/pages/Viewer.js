@@ -70,9 +70,9 @@ export default function Viewer() {
           }}
         >
           <Tab eventKey="first" title="Dashbaord" >
-            <Box sx={{ backgroundColor: "#E9EDF5" }} >
+            <Box>
               <br></br>
-              <DashTable />
+              <DashTable db_path={caseInfo.parsingDBpath} />
             </Box>
           </Tab>
           <Tab eventKey="second" title="Search & Review">

@@ -141,7 +141,7 @@ def process_files_in_directory(directory, conn, parsingDBpath):
                                         pt = plain_text
                                         md5_hash = calculate_hash(Body)
                                         emlBlobData = sqlite3.Binary(Body)
-                                        emlAttachments_info = (save_location, Fn, md5_hash, emlBlobData, pt)
+                                        emlAttachments_info = (save_location, subject, Fn, md5_hash, emlBlobData, pt)
                                         logging.info("Saving data to DB...")  # DB에 데이터 저장 전 로깅
                                         save_metadata_and_blob_to_db_emlAttachmentsVersion(conn, emlAttachments_info)
                                         logging.info("Data saved to DB: %s", emlfile_info)  # DB에 데이터 저장 후 로깅
@@ -170,8 +170,8 @@ def process_files_in_directory(directory, conn, parsingDBpath):
 def save_metadata_and_blob_to_db_emlAttachmentsVersion(conn, fileinfo):
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO emlAttachments (save_location, filename, hash, data, plain_text)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO emlAttachments (save_location, subject, filename, hash, data, plain_text)
+        VALUES (?, ?, ?, ?, ?, ?)
     ''',fileinfo)
     conn.commit()
 

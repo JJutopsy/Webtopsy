@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Doughnut, Bar } from "react-chartjs-2";
 import { Chart, ArcElement, registerables } from "chart.js";
 import { CategoryScale } from "chart.js";
+import Table from 'react-bootstrap/Table'; // Bootstrap Table을 import 합니다.
+
 import {
   Container,
-  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -28,9 +29,8 @@ Chart.register(...registerables);
 
 const theme = createTheme();
 
-const DashTable = () => {
-  // Data settings for charts
-  const pieChartData = {
+const DashTable = ({ db_path }) => {
+  const [pieChartData, setPieChartData] = useState({
     labels: ["pdf", "docx", "eml", "hwp", "기타"],
     datasets: [
       {
@@ -51,107 +51,100 @@ const DashTable = () => {
         ],
       },
     ],
-  };
+    total: 0
+  });
+  // Data settings for charts
 
-  const barChartOptions = [
-    {
-      label: "자주 언급된 인물",
-      data: {
-        labels: ["최우제", "문현준", "이상혁", "이민형", "류민석"],
-        datasets: [
-          {
-            backgroundColor: [
-              "#FF6384",
-              "#36A2EB",
-              "#FFCE56",
-              "#4CAF50",
-              "#FF5733",
-            ],
-            borderColor: "#fff",
-            borderWidth: 1,
-            hoverBackgroundColor: [
-              "#FF6384",
-              "#36A2EB",
-              "#FFCE56",
-              "#4CAF50",
-              "#FF5733",
-            ],
-            hoverBorderColor: "#fff",
-            data: [60, 50, 40, 35, 32],
-          },
-        ],
+  const fetchData = async () => {
+    const response = await fetch('http://localhost:5000/extension_distribution', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    },
-    {
-      label: "자주 언급된 장소",
-      data: {
-        labels: ["서울", "가산", "광화문", "부산", "고척"],
-        datasets: [
-          {
-            backgroundColor: [
-              "#FF6384",
-              "#36A2EB",
-              "#FFCE56",
-              "#4CAF50",
-              "#FF5733",
-            ],
-            borderColor: "#fff",
-            borderWidth: 1,
-            hoverBackgroundColor: [
-              "#FF6384",
-              "#36A2EB",
-              "#FFCE56",
-              "#4CAF50",
-              "#FF5733",
-            ],
-            hoverBorderColor: "#fff",
-            data: [110, 54, 40, 37, 22],
-          },
-        ],
-      },
-    },
-    {
-      label: "자주 등장한 태그",
-      data: {
-        labels: ["발주", "보고", "정산", "수주", "우승"],
-        datasets: [
-          {
-            backgroundColor: [
-              "#FF6384",
-              "#36A2EB",
-              "#FFCE56",
-              "#4CAF50",
-              "#FF5733",
-            ],
-            borderColor: "#fff",
-            borderWidth: 1,
-            hoverBackgroundColor: [
-              "#FF6384",
-              "#36A2EB",
-              "#FFCE56",
-              "#4CAF50",
-              "#FF5733",
-            ],
-            hoverBorderColor: "#fff",
-            data: [167, 146, 140, 97, 52],
-          },
-        ],
-      },
-    },
-  ];
+      body: JSON.stringify({ db_path: db_path }),
+    });
 
-  // Chart options
-  const chartOptions = {
-    maintainAspectRatio: false,
-    responsive: true,
-    width: 50,
-    height: 50,
-    plugins: {
-      legend: {
-        display: false,
+    const data = await response.json();
+    // 데이터를 count 기준으로 내림차순 정렬합니다.
+    const sortedData = data.sort((a, b) => b.count - a.count);
+
+    // 상위 5개와 그 외를 구분합니다.
+    const topFive = sortedData.slice(0, 5);
+    const others = sortedData.slice(5);
+
+    // 상위 5개의 labels와 dataCounts를 구합니다.
+    const labels = topFive.map(item => item.name);
+    const dataCounts = topFive.map(item => item.count);
+
+    // 나머지는 "기타"로 묶어서 count를 합산합니다.
+    const othersCount = others.reduce((sum, item) => sum + item.count, 0);
+    if (othersCount > 0) {
+      labels.push("기타");
+      dataCounts.push(othersCount);
+    }
+
+    const total = dataCounts.reduce((sum, count) => sum + count, 0);
+
+    setPieChartData({
+      labels: labels,
+      datasets: [
+        {
+          data: dataCounts,
+          backgroundColor: [
+            "#FF6384",
+            "#36A2EB",
+            "#FFCE56",
+            "#4CAF50",
+            "#FF5733",
+          ],
+          hoverBackgroundColor: [
+            "#FF6384",
+            "#36A2EB",
+            "#FFCE56",
+            "#4CAF50",
+            "#FF5733",
+          ],
+        },
+      ],
+      total: total,
+    });
+
+    const response1 = await fetch('http://localhost:5000/frequent_entities', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    },
-  };
+      body: JSON.stringify({ db_path: db_path }),
+    });
+    const response2 = await fetch('http://localhost:5000/after_hours_documents', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ db_path: db_path }),
+    });
+    const data2 = await response2.json();
+    setAfterHoursDocumentList(data2);
+    const response3 = await fetch('http://localhost:5000/recent_comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ db_path: db_path }),
+    });
+    const data3 = await response3.json();
+    setRecentBookmarkList(data3);
+    const response4 = await fetch('http://localhost:5000/recent_comments/email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ db_path: db_path }),
+    });
+    const data4 = await response4.json();
+    setEmail(data4);
+  }
+
 
   const doughnutOptions = {
     maintainAspectRatio: false,
@@ -166,52 +159,29 @@ const DashTable = () => {
   };
 
   // List data
-  const recentBookmarkList = [
+  const [recentBookmarkList, setRecentBookmarkList] = useState([{
+    id: 0,
+    post_id: 0,
+    username: "-",
+    context: "-",
+    create_at: "-",
+    type: "-"
+  }]);
+  const [email, setEmail] = useState([{}]);
+  const [afterHoursDocumentList, setAfterHoursDocumentList] = useState([
     {
-      markName: "GenG전자 관련",
-      documentName: "GenG 전자 재무제표 비교표.pdf",
-      creationTime: "2023-06-11 14:34:56",
-      note: "경쟁사 GenG 언급",
-    },
-    {
-      markName: "불일치 내역 관련",
-      documentName: "행복 물산 거래 수주 내역.xls",
-      creationTime: "2023-06-13 12:21:43",
-      note: "실제 거래내역 불일치",
-    },
-    {
-      markName: "GenG전자 관련",
-      documentName: "인사팀 발령 회의 배치도.docx",
-      creationTime: "2023-06-16 10:11:46",
-      note: "본인 소관 외 문서",
-    },
-    // ... rest of the data
-  ];
+      name: "-",
+      owner: "-",
+      time: "-",
+    }
+  ]);
 
-  const afterHoursDocumentList = [
-    {
-      documentName: "문현준대리_휴가 계획표.docx",
-      author: "문현준",
-      creationTime: "2023-06-01 19:30:33",
-    },
-    {
-      documentName: "외주 견적 계약서.pdf",
-      author: "문현준",
-      creationTime: "2023-06-02 22:00:45",
-    },
-    {
-      documentName: "10주년 행사 식순 및 참가자 명단.hwp",
-      author: "이상혁",
-      creationTime: "2023-07-08 21:30:12",
-    },
-    // ... rest of the data
-  ];
 
-  const [currentBarChart, setCurrentBarChart] = useState(0);
+   
 
-  const handleTabChange = (event, newValue) => {
-    setCurrentBarChart(newValue);
-  };
+  useEffect(() => {
+    fetchData();
+  }, [email,recentBookmarkList]);
 
   return (
     <div
@@ -220,7 +190,8 @@ const DashTable = () => {
         gridTemplateColumns: "1fr 1fr",
         gap: "20px",
         height: "900px",
-        backgroundColor: "#E9EDF5",
+        paddingLeft: "30px",
+        paddingRight: "30px"
       }}
     >
       {/* Recent Bookmark List */}
@@ -234,7 +205,7 @@ const DashTable = () => {
           }}
         >
           <Typography variant="h5" padding={"30px"}>
-            주요 확장자 분표
+            주요 확장자 분표 ({pieChartData.total.toLocaleString()})
             <hr></hr>
           </Typography>
           <Doughnut data={pieChartData} options={doughnutOptions} />
@@ -243,169 +214,45 @@ const DashTable = () => {
       <Paper elevation={3}>
         <div
           style={{
-            gridArea: "1 / 2 / 2 / 3",
             width: "100%",
             flexGrow: 1,
             marginBottom: "20px",
           }}
         >
           <Typography variant="h5" padding={"30px"}>
-            최근 생성 북마크
+            최근 생성 코멘트
             <hr></hr>
           </Typography>
 
           <Container>
-            <TableContainer>
-              <Table sx={{ minWidth: 650 }}>
-                <TableHead>
-                  <TableRow style={{ backgroundColor: "#f2f2f2" }}>
-                    {" "}
-                    {/* 테이블 헤더 색상 변경 */}
-                    <TableCell
-                      style={{
-                        width: "33%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        padding: "10px",
-                        border: "1px solid #ddd",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      북마크 명
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        width: "33%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        padding: "10px",
-                        border: "1px solid #ddd",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      문서명
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        width: "33%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        padding: "10px",
-                        border: "1px solid #ddd",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      생성일시
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        width: "33%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        padding: "10px",
-                        border: "1px solid #ddd",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      비고
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {recentBookmarkList.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell
-                        style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          padding: "10px",
-                          border: "1px solid #ddd",
-                          textAlign: "center",
-                        }}
-                      >
-                        {item.markName}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          padding: "10px",
-                          border: "1px solid #ddd",
-                          textAlign: "center",
-                        }}
-                      >
-                        {item.documentName}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          padding: "10px",
-                          border: "1px solid #ddd",
-                          textAlign: "center",
-                        }}
-                      >
-                        {item.creationTime}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          padding: "10px",
-                          border: "1px solid #ddd",
-                          textAlign: "center",
-                        }}
-                      >
-                        {item.note}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Post ID</th>
+                  <th>Username</th>
+                  <th>Context</th>
+                  <th>Create At</th>
+                  <th>Line</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentBookmarkList.length > 0 && recentBookmarkList.map(item => (
+                  <tr key={item.id}>
+                    <td>{item.id}</td>
+                    <td>{item.post_id}</td>
+                    <td>{item.username}</td>
+                    <td>{item.context}</td>
+                    <td>{item.create_at}</td>
+                    <td>{item.type}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           </Container>
         </div>
       </Paper>
-      {/* Bar Chart */}
-      <Paper elevation={3}>
-        <div
-          style={{
-            gridArea: "2 / 1 / 3 / 2",
-            width: "100%",
-            height: "200px",
-            marginBottom: "20px",
-          }}
-        >
-          <Typography variant="h5" padding={"30px"}>
-            주요 키워드
-            <hr></hr>
-          </Typography>
-          <Tabs value={currentBarChart} onChange={handleTabChange} centered>
-            {barChartOptions.map((chart, index) => (
-              <Tab key={index} label={chart.label} />
-            ))}
-          </Tabs>
-          <Box sx={{ p: 3 }}>
-            <Bar
-              data={barChartOptions[currentBarChart].data}
-              options={chartOptions}
-            />
-          </Box>
-        </div>
-      </Paper>
-
+      
       {/* After Hours Document List */}
       <Paper elevation={3}>
         <div
@@ -421,100 +268,65 @@ const DashTable = () => {
             <hr></hr>
           </Typography>
           <Container>
-            <TableContainer>
-              <Table sx={{ minWidth: 650 }}>
-                <TableHead>
-                  <TableRow style={{ backgroundColor: "#f2f2f2" }}>
-                    {" "}
-                    {/* 테이블 헤더 색상 변경 */}
-                    <TableCell
-                      style={{
-                        width: "33%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        padding: "10px",
-                        border: "1px solid #ddd",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      문서명
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        width: "33%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        padding: "10px",
-                        border: "1px solid #ddd",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      작성자
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        width: "33%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        padding: "10px",
-                        border: "1px solid #ddd",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      생성 시간
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {afterHoursDocumentList.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell
-                        style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          padding: "10px",
-                          border: "1px solid #ddd",
-                          textAlign: "center",
-                        }}
-                      >
-                        {item.documentName}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          padding: "10px",
-                          border: "1px solid #ddd",
-                          textAlign: "center",
-                        }}
-                      >
-                        {item.author}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          padding: "10px",
-                          border: "1px solid #ddd",
-                          textAlign: "center",
-                        }}
-                      >
-                        {item.creationTime}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+          <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>File Name</th>
+                  <th>Onwer</th>
+                  <th>Last Modified</th>
+                </tr>
+              </thead>
+              <tbody>
+                {afterHoursDocumentList.length >0 && email.map(item => (
+                  <tr key={item.id}>
+                    <td>{item.name}</td>
+                    <td>{item.owner}</td>
+                    <td>{item.time}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Container>
+        </div>
+      </Paper>
+      <Paper elevation={3}>
+        <div
+          style={{
+            width: "100%",
+            flexGrow: 1,
+            marginBottom: "20px",
+          }}
+        >
+          <Typography variant="h5" padding={"30px"}>
+            최근 이메일 리뷰 ({email.length})
+            <hr></hr>
+          </Typography>
+
+          <Container>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Post ID</th>
+                  <th>Username</th>
+                  <th>Context</th>
+                  <th>Create At</th>
+                  <th>Line</th>
+                </tr>
+              </thead>
+              <tbody>
+                {email.length >0 && email.map(item => (
+                  <tr key={item.id}>
+                    <td>{item.id}</td>
+                    <td>{item.post_id}</td>
+                    <td>{item.username}</td>
+                    <td>{item.context}</td>
+                    <td>{item.create_at}</td>
+                    <td>{item.type}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           </Container>
         </div>
       </Paper>

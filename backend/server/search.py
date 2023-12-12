@@ -3,13 +3,42 @@ import sqlite3
 import os
 import re
 import sys
+import base64
 from dotenv import load_dotenv
 from datetime import datetime
+
 search_bp = Blueprint('search', __name__)
 
 def highlight_keywords(text, keyword):
     highlighted = re.sub(f'({keyword})', r'<b>\1</b>', text, flags=re.IGNORECASE)
     return highlighted
+
+@search_bp.route('/blob/<int:file_id>', methods=['POST'])
+def get_blob(file_id):
+    load_dotenv()
+    data = request.get_json()
+    parsingDBpath = os.environ.get("REACT_APP_HOME") + "/" + data.get("parsingDBpath")
+
+    if not os.path.exists(parsingDBpath):
+        return '데이터베이스 파일을 찾을 수 없습니다.', 404
+
+    conn = sqlite3.connect(parsingDBpath)
+    cursor = conn.cursor()
+
+    query = "SELECT blob_data FROM files WHERE id = ?"
+    result = cursor.execute(query, (file_id,)).fetchone()
+    conn.close()
+
+    if not result:
+        return '검색 결과가 없습니다.', 404
+
+    blob_data = result[0]
+    if blob_data:
+        # BLOB 데이터를 base64 문자열로 변환합니다.
+        base64_data = base64.b64encode(blob_data).decode('utf-8')
+        return jsonify({'blob': base64_data})
+
+    return 'BLOB 데이터가 없습니다.', 400
 
 @search_bp.route('/keyword/<int:file_id>', methods=['POST'])
 def search_id(file_id):
