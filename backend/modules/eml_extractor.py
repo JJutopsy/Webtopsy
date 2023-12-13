@@ -107,16 +107,15 @@ class EmlParser:
 
         # Date 처리
         date_str = self.msg.get('Date', '')
-        formatted_date = '날짜 없음'  # 기본값 설정
+        formatted_date = '날짜 없음'
         if date_str:
             try:
-                # 타임존 정보 제거 후 날짜 파싱 시도
                 date_str = re.sub(r'\([^)]*\)', '', date_str).strip()
                 date = date_parser.parse(date_str)
                 formatted_date = date.strftime('%Y-%m-%d %H:%M:%S')
             except Exception as e:
                 print(f"날짜 파싱 오류 (스킵됨): {e}")
-                return None  # 파싱 오류 발생 시, 이 이메일은 처리하지 않음
+                return None
 
         # From 처리
         from_ = decode_header(self.msg['From'])[0][0]
