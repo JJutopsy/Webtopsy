@@ -9,7 +9,7 @@ emlthread_bp = Blueprint('emlthread', __name__)
 @emlthread_bp.route('/emlthread', methods=['POST'])
 def emlthread():
     data = request.json
-    db_path = data.get('db_path')
+    db_path = data.get('parsingDBpath')
     get_subject = data.get('email_subject')
 
     if not db_path or not get_subject:
