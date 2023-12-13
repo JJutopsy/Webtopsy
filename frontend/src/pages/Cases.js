@@ -21,6 +21,7 @@ import TabPanel from "@mui/lab/TabPanel";
 import { useRecoilState } from 'recoil';
 import { buttonState } from "../atom/ButtonState";
 import CaseCard from '../components/CaseCard';  // CaseCard 컴포넌트를 import합니다.
+import { Spinner } from "react-bootstrap";
 
 
 export default function Cases() {
@@ -32,7 +33,7 @@ export default function Cases() {
   const [info, setInfo] = useState("");
   const [open, setOpen] = useState(false);
   const [cases, setCases] = useState([]);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [value, setValue] = React.useState("1");
   const [isCommentAllowed, setIsCommentAllowed] = useState(true); // 코멘트 달기 권한을 저장할 state
 
@@ -59,38 +60,42 @@ export default function Cases() {
     setOpen(false);
   };
 
-  const sendCaseRequest = () => {
+  const sendCaseRequest = async () => {
     if (name === "" || selectedItems.length === 0) {
       setOpen(true);
     } else {
-      const currentItems = selectedItems.map(item => item.current);
-      const owners = selectedItems.map(item=>item.owner);
-      const data = {
+      const req = {
         casename: name,
         caseinfo: info,
-        filesWithOwners : selectedItems,
+        filesWithOwners: selectedItems,
         total: selectedItems.length,
         nnp: true,
         tag: true,
       };
-
-      console.log(data);
-      fetch("http://localhost:5000/newcase", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
-        .then((response) => response.json())
-        .then((data) => console.log(data))
-        .catch((error) => {
-          console.error("Error:", error);
+      setIsLoading(true);
+      try {
+        const response = await fetch("http://localhost:5000/newcase", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(req),
         });
-      fetchCases().then((data) => setCases(data));
-      setShow(false);
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setShow(false);
+        setIsLoading(false);
+        fetchCases();
+      } catch (error) {
+        setIsLoading(false);
+        console.error("Error:", error);
+      }
     }
   };
+  
 
   const handleClose = () => {
     setShow(false);
@@ -104,14 +109,20 @@ export default function Cases() {
     },
   });
 
-  async function fetchCases() {
-    const response = await axios.get("http://localhost:5000/case");
+  const fetchCases = async() =>{
+    const response = await fetch('http://localhost:5000/case', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
 
-    return response.data.cases;
+    const data = await response.json();
+    setCases(data.cases);
   }
 
   useEffect(() => {
-    fetchCases().then((data) => setCases(data));
+    fetchCases();
   }, []);
 
   return (
@@ -282,8 +293,22 @@ export default function Cases() {
               닫기
             </Button>
             {value === "3" && (
-              <Button variant="primary" onClick={sendCaseRequest}>
-                생성
+              <Button variant="primary" onClick={sendCaseRequest} disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                    />
+                    　생성 중...
+                  </>
+                ) : (
+                  '생성'
+                )}
               </Button>
             )}
           </Modal.Footer>

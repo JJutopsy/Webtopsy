@@ -181,7 +181,7 @@ const DashTable = ({ db_path }) => {
 
   useEffect(() => {
     fetchData();
-  }, [email,recentBookmarkList]);
+  }, []);
 
   return (
     <div
