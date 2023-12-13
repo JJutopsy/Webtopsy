@@ -24,7 +24,7 @@ export default function Comment({ selectedId, onCommentCount, db_path }) {
       const data = {
         db_path: db_path,
       };
-      fetch(`http://localhost:5000/comments/${selectedId}`, {
+      fetch(`/comments/${selectedId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -56,7 +56,7 @@ const DashTable = ({ db_path }) => {
   // Data settings for charts
 
   const fetchData = async () => {
-    const response = await fetch('http://localhost:5000/extension_distribution', {
+    const response = await fetch('/extension_distribution', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -109,14 +109,14 @@ const DashTable = ({ db_path }) => {
       total: total,
     });
 
-    const response1 = await fetch('http://localhost:5000/frequent_entities', {
+    const response1 = await fetch('/frequent_entities', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ db_path: db_path }),
     });
-    const response2 = await fetch('http://localhost:5000/after_hours_documents', {
+    const response2 = await fetch('/after_hours_documents', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ const DashTable = ({ db_path }) => {
     });
     const data2 = await response2.json();
     setAfterHoursDocumentList(data2);
-    const response3 = await fetch('http://localhost:5000/recent_comments', {
+    const response3 = await fetch('/recent_comments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ const DashTable = ({ db_path }) => {
     });
     const data3 = await response3.json();
     setRecentBookmarkList(data3);
-    const response4 = await fetch('http://localhost:5000/recent_comments/email', {
+    const response4 = await fetch('/recent_comments/email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -243,7 +243,7 @@ const DashTable = ({ db_path }) => {
                     <td>{item.post_id}</td>
                     <td>{item.username}</td>
                     <td>{item.context}</td>
-                    <td>{item.create_at}</td>
+                    <td>{item.created_at}</td>
                     <td>{item.type}</td>
                   </tr>
                 ))}
@@ -321,7 +321,7 @@ const DashTable = ({ db_path }) => {
                     <td>{item.post_id}</td>
                     <td>{item.username}</td>
                     <td>{item.context}</td>
-                    <td>{item.create_at}</td>
+                    <td>{item.created_at}</td>
                     <td>{item.type}</td>
                   </tr>
                 ))}

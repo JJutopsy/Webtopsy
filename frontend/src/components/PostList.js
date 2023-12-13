@@ -87,7 +87,7 @@ function PostList() {
       keyword: keyword,
     };
 
-    const response = await fetch('http://localhost:5000/keyword', {
+    const response = await fetch('/keyword', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

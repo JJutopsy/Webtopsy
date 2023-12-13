@@ -23,7 +23,7 @@ const CodeWithComments = ({ code, db_path, setResultSimilarity }) => {
     
     const fetchComments = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/comments/${code.id}`, {
+            const response = await fetch(`/comments/${code.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ const CodeWithComments = ({ code, db_path, setResultSimilarity }) => {
         const data = {
             parsingDBpath: db_path,
         }
-        fetch(`http://localhost:5000/blob/${code.id}`,{
+        fetch(`/blob/${code.id}`,{
             method:'POST',
             headers:{
                 'Content-Type':'application/json',
@@ -116,7 +116,7 @@ const CodeWithComments = ({ code, db_path, setResultSimilarity }) => {
             parsingDBpath: db_path,
             key_document_id: code.id
         }
-        fetch('http://localhost:5000/similarity', {
+        fetch('/similarity', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ const CodeWithComments = ({ code, db_path, setResultSimilarity }) => {
             db_path: db_path
         };
         console.log(newComment);
-        fetch('http://localhost:5000/comment', {
+        fetch('/comment', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

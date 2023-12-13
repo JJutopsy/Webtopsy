@@ -88,7 +88,7 @@ function EmailList() {
       keyword: keyword,
     };
 
-    const response = await fetch('http://localhost:5000/keyword/email', {
+    const response = await fetch('/keyword/email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

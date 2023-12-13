@@ -20,7 +20,7 @@ export default function CommentsList({ db_path }) {
       const data = {
         db_path: db_path,
       };
-      fetch("http://localhost:5000/recent_comments", {
+      fetch("/recent_comments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

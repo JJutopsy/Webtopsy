@@ -74,7 +74,7 @@ export default function Cases() {
       };
       setIsLoading(true);
       try {
-        const response = await fetch("http://localhost:5000/newcase", {
+        const response = await fetch("/newcase", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export default function Cases() {
   });
 
   const fetchCases = async() =>{
-    const response = await fetch('http://localhost:5000/case', {
+    const response = await fetch('/case', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -19,7 +19,7 @@ function Header() {
   const [isLoggedIn, setIsLoggedIn] = useRecoilState(LoginState);
   const [User, setUser] = useRecoilState(LoginName);
   const fetchLogin = (id, pw) => {
-    fetch("http://localhost:5000/login", {
+    fetch("/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

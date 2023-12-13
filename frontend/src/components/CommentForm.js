@@ -34,7 +34,7 @@ export default function CommentForm({ selectedId, onAddComment, db_path }) {
     };
 
     // 서버로 코멘트 데이터 전송
-    fetch("http://localhost:5000/comment", {
+    fetch("/comment", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

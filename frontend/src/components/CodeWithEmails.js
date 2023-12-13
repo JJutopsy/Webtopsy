@@ -26,7 +26,7 @@ const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
     const handleClose = () => setShow(false);
     const fetchComments = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/comment/email/${code.id}`, {
+            const response = await fetch(`/comment/email/${code.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
             parsingDBpath: db_path,
             email_subject: code.subject
         }
-        fetch('http://localhost:5000/emlthread', {
+        fetch('/emlthread', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
             db_path: db_path
         };
         console.log(newComment);
-        fetch('http://localhost:5000/comment/email', {
+        fetch('/comment/email', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

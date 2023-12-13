@@ -19,7 +19,7 @@ const DirectoryBrowser = ({ onSelectedItemsChange }) => {
   const itemsPerPage = 10;
 
   const fetchFiles = async (newPath) => {
-    const response = await fetch("http://localhost:5000/files", {
+    const response = await fetch("/files", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

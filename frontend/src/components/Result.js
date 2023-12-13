@@ -20,7 +20,7 @@ const Result = ({ rows, db_path }) => {
       
         const fetchDocument = async (id) => {
             const req = { db_path: db_path }
-            const response = await fetch(`http://localhost:5000/keyword/${id}`, {
+            const response = await fetch(`/keyword/${id}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
