@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 import sqlite3
 from email.parser import BytesParser
 from email import policy
+import base64
 
 emlthread_bp = Blueprint('emlthread', __name__)
 
@@ -62,6 +63,7 @@ class EmailDatabaseReader:
     def find_related_emails(self, message_id, references, in_reply_to):
         found_emails = []
         seen_message_ids = set()
+
         query = "SELECT subject, sender, receiver, date, body, blob_data FROM emlEmails"
         for row in self.cursor.execute(query):
             subject, sender, receiver, date, body, blob_data = row
@@ -74,34 +76,37 @@ class EmailDatabaseReader:
             other_message_id = msg.get("Message-ID")
             other_references = msg.get("References", "").split()
             other_in_reply_to = msg.get("In-Reply-To", "").split()
-            
-            # 중복 제거 확인
-            if other_message_id in seen_message_ids:
-                continue
-            seen_message_ids.add(other_message_id)
 
-            # 관련 이메일 확인 로직
-            match_type = None
-            if other_message_id == message_id or \
-                other_message_id in references or \
-                other_message_id in in_reply_to or \
-                any(ref in other_references or ref in other_in_reply_to for ref in references + in_reply_to):
-                match_type = 'Direct Match'
-            elif message_id in other_references or \
-                message_id in other_in_reply_to or \
-                any(ref in references or ref in in_reply_to for ref in other_references + other_in_reply_to):
-                match_type = 'Related Match'
-
-            if match_type:
+            # 중복 제거 및 관련 이메일 확인
+            if other_message_id not in seen_message_ids and \
+               (other_message_id == message_id or \
+               other_message_id in references or \
+               other_message_id in in_reply_to or \
+               any(ref in other_references or ref in other_in_reply_to for ref in references + in_reply_to)):
+                seen_message_ids.add(other_message_id)
                 email_data = {
                     "date": date,
                     "subject": subject,
                     "sender": sender,
                     "receiver": receiver,
-                    "body": body,  # 이메일 본문을 결과에 포함
-                    "match_type": match_type  # 관련성 유형에 따라 설정
+                    "body": body
                 }
                 found_emails.append(email_data)
 
-        sorted_emails = sorted(found_emails, key=lambda x: x['date'])
-        return sorted_emails
+        # 각 이메일에 대한 첨부파일 정보 추가
+        for email in found_emails:
+            self.add_attachment_data(email['subject'], email)
+
+        return sorted(found_emails, key=lambda x: x['date'])
+
+    def add_attachment_data(self, subject, email):
+        attachment_query = "SELECT filename, data FROM emlAttachments WHERE subject = ?"
+        self.cursor.execute(attachment_query, (subject,))
+        attachment_row = self.cursor.fetchone()
+
+        if attachment_row:
+            email['att_file_name'], att_file_data = attachment_row
+            email['att_file_data'] = base64.b64encode(att_file_data).decode() if att_file_data else ""
+        else:
+            email['att_file_name'] = ""
+            email['att_file_data'] = ""
