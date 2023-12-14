@@ -95,7 +95,7 @@ function Header() {
               {isLoggedIn ? (
                 <Nav.Link> {User} </Nav.Link>
               ) : (
-                <Nav.Link onClick={handleShow0}>Enter</Nav.Link>
+                <Nav.Link onClick={handleShow0}>Login</Nav.Link>
               )}
               {isLoggedIn ? (
                 <Nav.Link onClick={logoutHandler}> Logout </Nav.Link>
@@ -109,7 +109,7 @@ function Header() {
 
       <Modal show={show0} onHide={handleClose0}>
         <Modal.Header closeButton>
-          <Modal.Title>Enter {msg}</Modal.Title>
+          <Modal.Title>Login {msg}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -138,7 +138,7 @@ function Header() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="primary" onClick={handleClose0}>
-            Enter
+            Login
           </Button>
         </Modal.Footer>
       </Modal>

@@ -229,7 +229,7 @@ const DashTable = ({ db_path }) => {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Post ID</th>
+                  <th>Document ID</th>
                   <th>Username</th>
                   <th>Context</th>
                   <th>Create At</th>
@@ -277,6 +277,17 @@ const DashTable = ({ db_path }) => {
                 </tr>
               </thead>
               <tbody>
+                <tr>
+                  <td>
+                  20230913_탕비실비품_지출결의서.docx
+                  </td>
+                  <td>
+                  우현우의 PC
+                  </td>
+                  <td>
+                  2023-12-12 21:10
+                  </td>
+                </tr>
                 {afterHoursDocumentList.length >0 && email.map(item => (
                   <tr key={item.id}>
                     <td>{item.name}</td>
@@ -307,11 +318,12 @@ const DashTable = ({ db_path }) => {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Post ID</th>
+                  <th>Email ID</th>
                   <th>Username</th>
                   <th>Context</th>
-                  <th>Create At</th>
                   <th>Line</th>
+                  <th>Create At</th>
+                  
                 </tr>
               </thead>
               <tbody>
@@ -321,8 +333,9 @@ const DashTable = ({ db_path }) => {
                     <td>{item.post_id}</td>
                     <td>{item.username}</td>
                     <td>{item.context}</td>
-                    <td>{item.created_at}</td>
                     <td>{item.type}</td>
+                    <td>{item.created_at}</td>
+                    
                   </tr>
                 ))}
               </tbody>

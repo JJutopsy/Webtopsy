@@ -23,3 +23,16 @@
   border: 2px solid;
 
 }
+.my-modal {
+  width: 50vw !important; /* Occupy the 90% of the screen width */
+  max-width: 90vw !important;
+  position: relative !important;
+  display: table !important;
+  overflow-y: auto !important;
+  overflow-x: auto !important;
+  min-width: 300px !important;
+  height: 800px !important;
+  margin: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}

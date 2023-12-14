@@ -24,7 +24,7 @@ export default function CaseCard({ caseItem }) {
       <Card.Body>
         <Card.Title>{caseItem.casename}</Card.Title>
         <Card.Text>{caseItem.caseinfo}</Card.Text>
-        <Card.Text>{caseItem.parsingDBpath}</Card.Text>
+        <br/>
         <Button
           variant="primary"
           onClick={() => {

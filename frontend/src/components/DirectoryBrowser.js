@@ -60,7 +60,7 @@ const DirectoryBrowser = ({ onSelectedItemsChange }) => {
     const filePath = pathStr + "\\" + file.name;
 
     let badgeColor = "primary";
-    if (filePath.endsWith(".zip")) {
+    if (filePath.endsWith(".E01")) {
       badgeColor = "warning";
     } else if (filePath.endsWith(".001") || filePath.endsWith(".dd")) {
       badgeColor = "danger";

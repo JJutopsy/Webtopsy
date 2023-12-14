@@ -240,9 +240,9 @@ const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
                                                 <strong className="me-auto">{email.sender}</strong>
                                                 <small>{email.date}</small>
                                             </Toast.Header>
-                                            <Toast.Body>{email.subject}<hr />{email.body}<hr>
+                                            <Toast.Body><strong>{email.subject}</strong><hr />{email.body}<hr>
                                             </hr>{email.att_file_name &&
-                                                <a onClick={() => downloadBase64File(email.att_file_data, email.att_file_name)}>
+                                                <a onClick={() => downloadBase64File(email.att_file_data, email.att_file_name)} href='#'>
                                                     <strong>첨부파일</strong> : {email.att_file_name}
                                                 </a>
                                                 }
@@ -258,7 +258,7 @@ const CodeWithEmails = ({ code, db_path, setResultSimilarity }) => {
             </Tabs>
 
 
-            <Modal show={show} onHide={handleClose}>
+            <Modal show={show} onHide={handleClose} dialogClassName="my-modal" aria-labelledby="example-custom-modal-styling-title">
                 <Modal.Header closeButton>
                     <Modal.Title>Comment on line {selectedLine}</Modal.Title>
                 </Modal.Header>

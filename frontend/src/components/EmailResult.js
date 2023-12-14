@@ -45,10 +45,18 @@ const EmailResult = ({ rows, db_path }) => {
                                                 ))}
                                             </div>
                                             <div className="d-flex align-items-center">
-                                                <span>{row.sender}</span>
+                                                <span>{row.date}　</span>
+                                                <span>[ {row.sender}</span>
                                                 <FaArrowRight className="mx-2" />
-                                                <span>{row.receiver}</span>
+                                                <span style={{
+                                                    maxWidth: '30ch',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                }}>{row.receiver} ]</span>
+
                                             </div>
+
                                         </section>
                                         <hr></hr>
                                     </article>
@@ -60,7 +68,7 @@ const EmailResult = ({ rows, db_path }) => {
             </Box>
             {selectedText && (
                 <Box flex={1} style={{ maxHeight: '80vh', overflowY: 'scroll' }}>
-                   <CodeWithEmails code={selectedText} db_path={db_path} />
+                    <CodeWithEmails code={selectedText} db_path={db_path} />
                 </Box>
             )}
         </Box>

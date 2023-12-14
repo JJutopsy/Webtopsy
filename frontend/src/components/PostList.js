@@ -227,10 +227,10 @@ function PostList() {
               <Card>
                 <Card.Header>
                   <Nav variant="tabs" defaultActiveKey="first" onSelect={setActiveTab} className="w-100">
-                    <Nav.Item>
+                  <Nav.Item style={{width:"50%",  textAlign:'center'}}>
                       <Nav.Link eventKey="first">태그 보기</Nav.Link>
                     </Nav.Item>
-                    <Nav.Item>
+                    <Nav.Item style={{width:"50%",  textAlign:'center'}}>
                       <Nav.Link eventKey="second">인명 보기</Nav.Link>
                     </Nav.Item>
                   </Nav>
