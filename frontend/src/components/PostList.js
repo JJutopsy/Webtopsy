@@ -226,7 +226,7 @@ function PostList() {
             <div className="tagList">
               <Card>
                 <Card.Header>
-                  <Nav variant="tabs" defaultActiveKey="first" onSelect={setActiveTab}>
+                  <Nav variant="tabs" defaultActiveKey="first" onSelect={setActiveTab} className="w-100">
                     <Nav.Item>
                       <Nav.Link eventKey="first">태그 보기</Nav.Link>
                     </Nav.Item>
@@ -268,7 +268,8 @@ function PostList() {
             </div>
           </Col>
           <Col md={10}>
-            <div className="searchResult">
+            
+            <div className="searchResult" style={{paddingTop:'8px'}}>
               <Result rows={filteredRows} db_path={db_path} />
             </div>
           </Col>
