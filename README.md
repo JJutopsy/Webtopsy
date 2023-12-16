@@ -1,7 +1,9 @@
 # Webtopsy
 
 > AI 라이브러리 설치
+
 Mecab 설치 https://uwgdqo.tistory.com/363
+
 학습 데이터 다운로드(NER) https://drive.google.com/file/d/1vsbDry3b0h4O1QYrjDSKGVSXYQBrk_hs/view?usp=sharing
 
 > 초기 설정
