@@ -37,4 +37,4 @@ cd frontend/
 npm i react --legacy-peer-deps
 npm start
 ```
-
+안될시 dswhdcks@naver.com 으로 문의
